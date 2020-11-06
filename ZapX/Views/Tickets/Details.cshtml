@@ -1,0 +1,104 @@
+﻿@model ZapX.Models.Ticket
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Ticket Details</h1>
+
+<div>
+    <h4>Project: <b>@Model.Project.Name</b></h4>
+    <h5>Ticket: <b>@Model.Title</b></h5>
+    <h6>Comments: <b>@Model.Comments.Count()</b></h6>
+
+    <hr />
+    <dl class="row">
+        @*<dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.Title)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.Title)
+            </dd>*@
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Created)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Created)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Updated)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Updated)
+        </dd>
+        @*<dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Project)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Project.Name)
+            </dd>*@
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketType)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TicketType.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketPriority)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TicketPriority.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TicketStatus)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TicketStatus.Name)
+        </dd>
+        @*<dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.OwnerUser)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.OwnerUser.Id)
+            </dd>*@
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DeveloperUser)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DeveloperUser.FullName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Comments)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var comment in Model.Comments.OrderByDescending(c => c.Created))
+            {
+                @comment.Created.ToString("MMM dd H:mm")
+                <span> : </span>
+                @comment.User.FullName
+                <span> : </span>
+                @comment.Comment
+                <br />
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <a class="btn btn-info" asp-action="Create" asp-controller="TicketComments" asp-route-id="@Model.Id">Leave a Comment</a> <hr />
+    }
+</div>
+<div>
+    @if (User.IsInRole("Admin") || User.IsInRole("Project Manager"))
+    {
+        <a class="btn btn-info" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+    }
+    <a class="btn btn-info" asp-action="Details" asp-controller="Projects" asp-route-id="@Model.ProjectId">Back to Project</a>
+</div>

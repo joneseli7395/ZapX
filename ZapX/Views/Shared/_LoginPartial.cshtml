@@ -1,0 +1,47 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<BTUser> SignInManager
+@inject UserManager<BTUser> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item">
+            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello, @User.Identity.Name!</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-light" data-target="#logout" data-toggle="modal">Logout</a>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </li>
+    }
+</ul>
+
+<div class="modal" id="logout">
+    <div class="modal modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header text-center bg-dark">
+                <h4 class="modal-title text-light">Logout</h4>
+                <button type="button" class="btn bg-dark text-light" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <p>Are you sure you want to logout?</p>
+                            <form class="form-group" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                <button type="submit" class="btn btn-danger text-light">Logout</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
