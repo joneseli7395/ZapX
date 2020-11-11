@@ -11,7 +11,6 @@ namespace ZapX.Models
         public int Id { get; set; }
 
         public string FilePath { get; set; }
-        [Required]
         public byte[] FileData { get; set; }
         public string Description { get; set; }
         public DateTimeOffset Created { get; set; }

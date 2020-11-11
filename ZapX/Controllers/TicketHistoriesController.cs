@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using ZapX.Models;
 
 namespace ZapX.Controllers
 {
+    [Authorize]
     public class TicketHistoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -59,7 +61,7 @@ namespace ZapX.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,TicketId,Property,OldValue,NewValue,Created,UserId")] TicketHistory ticketHistory)
+        public async Task<IActionResult> Create([Bind("TicketId,Property,OldValue,NewValue,Created,UserId")] TicketHistory ticketHistory)
         {
             if (ModelState.IsValid)
             {
@@ -68,7 +70,7 @@ namespace ZapX.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketHistory.TicketId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketHistory.UserId);
+            ViewData["UserId"] = new SelectList(_context.Users, "Id", "FullName", ticketHistory.UserId);
             return View(ticketHistory);
         }
 

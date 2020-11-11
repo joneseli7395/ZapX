@@ -40,6 +40,7 @@ namespace ZapX
 
             services.AddScoped<IBTRolesService, BTRolesService>();
             services.AddScoped<IBTProjectService, BTProjectService>();
+            services.AddScoped<IBTHistoryService, BTHistoryService>();
 
             services.AddControllersWithViews();
             services.AddRazorPages();

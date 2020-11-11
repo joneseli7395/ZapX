@@ -158,14 +158,89 @@ else
 <br />
 <hr />
 <div>
-    @if (User.IsInRole("Admin") || User.IsInRole("Submitter"))
+    @if (User.Identity.IsAuthenticated)
     {
-        <a class="btn btn-info" asp-controller="Tickets" asp-action="Create" asp-route-id="@Model.Project.Id">Create Ticket</a>
+        @*<a class="btn btn-success" asp-controller="Tickets" asp-action="Create" asp-route-id="@Model.Project.Id">Create Ticket</a>*@
+        <a class="btn btn-success text-light" data-target="#create" data-toggle="modal">Create Ticket</a>
     }
     @if (User.IsInRole("Admin") || User.IsInRole("Project Manager"))
     {
         <a class="btn btn-info" asp-action="AssignUsers" asp-route-id="@Model.Project.Id">Add Users</a>
         <a class="btn btn-info" asp-action="Edit" asp-route-id="@Model.Project.Id">Edit</a>
     }
-    <a class="btn btn-info" asp-action="Index">Back to List</a>
+    <a class="btn btn-info" asp-action="Index">Back to Projects</a>
+</div>
+
+<div class="modal" id="create">
+    <div class="modal modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header text-center bg-dark">
+                <h4 class="modal-title text-light">Create a Ticket</h4>
+                <button type="button" class="btn bg-dark text-light" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <form asp-action="Create" asp-controller="Tickets" asp-route-id="@Model.Project.Id" enctype="multipart/form-data">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                @Html.Hidden("ProjectId", Model.ProjectId)
+                                <div class="form-group">
+                                    <label asp-for="Ticket.Title" class="control-label"></label>
+                                    <input asp-for="Ticket.Title" class="form-control" />
+                                    <span asp-validation-for="Ticket.Title" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Ticket.Description" class="control-label"></label>
+                                    <input asp-for="Ticket.Description" class="form-control" />
+                                    <span asp-validation-for="Ticket.Description" class="text-danger"></span>
+                                </div>
+                                @*<div class="form-group">
+                                        <label asp-for="Created" class="control-label"></label>
+                                        <input asp-for="Created" class="form-control" />
+                                        <span asp-validation-for="Created" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="Updated" class="control-label"></label>
+                                        <input asp-for="Updated" class="form-control" />
+                                        <span asp-validation-for="Updated" class="text-danger"></span>
+                                    </div>*@
+                                <div class="form-group">
+                                    <label asp-for="Ticket.TicketTypeId" class="control-label"></label>
+                                    <select asp-for="Ticket.TicketTypeId" class="form-control" asp-items="ViewBag.TicketTypeId"></select>
+                                </div>
+                                @if (User.IsInRole("Admin") || User.IsInRole("Project Manager"))
+                                {
+                                    <div class="form-group">
+                                        <label asp-for="Ticket.TicketPriorityId" class="control-label"></label>
+                                        <select asp-for="Ticket.TicketPriorityId" class="form-control" asp-items="ViewBag.TicketPriorityId"></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="Ticket.TicketStatusId" class="control-label"></label>
+                                        <select asp-for="Ticket.TicketStatusId" class="form-control" asp-items="ViewBag.TicketStatusId"></select>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <input type="hidden" asp-for="Ticket.TicketPriorityId" />
+                                    <input type="hidden" asp-for="Ticket.TicketStatusId" />
+                                }
+                                @*<div class="form-group">
+                                        <label asp-for="OwnerUserId" class="control-label"></label>
+                                        <select asp-for="OwnerUserId" class="form-control" asp-items="ViewBag.OwnerUserId"></select>
+                                    </div>*@
+                                <div class="form-group">
+                                    <label asp-for="Ticket.DeveloperUserId" class="control-label"></label>
+                                    <select asp-for="Ticket.DeveloperUserId" class="form-control" asp-items="ViewBag.DeveloperUserId"></select>
+                                </div>
+                                <div class="form-group">
+                                    <input type="submit" value="Create" class="btn btn-info" />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

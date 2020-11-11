@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -11,6 +12,7 @@ using ZapX.Models;
 
 namespace ZapX.Controllers
 {
+    [Authorize]
     public class TicketCommentsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -55,7 +57,7 @@ namespace ZapX.Controllers
             var model = new TicketComment();
             if (id == null)
             {
-                ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description");
+                ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Title");
             }
             else
             {
@@ -139,7 +141,7 @@ namespace ZapX.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketComment.UserId);
+            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Name", ticketComment.UserId);
             return View(ticketComment);
         }
 

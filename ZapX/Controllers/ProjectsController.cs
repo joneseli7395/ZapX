@@ -11,9 +11,11 @@ using ZapX.Models;
 using ZapX.Models.ViewModels;
 using ZapX.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ZapX.Controllers
 {
+    [Authorize]
     public class ProjectsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -40,6 +42,15 @@ namespace ZapX.Controllers
             }
             var vm = new TicketProjectsViewModel();
 
+
+            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName");
+            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName");
+            ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name");
+            //ViewData["ProjectId"] = id.Value;
+            ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name");
+            ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name");
+
+
             var project = await _context.Projects
                 .Include(p => p.ProjectUsers)//Reference ProjectUsers
                 .ThenInclude(p => p.User) //Reference Users
@@ -53,9 +64,10 @@ namespace ZapX.Controllers
                 .Include(t => t.DeveloperUser)
                 .ToListAsync();
 
-
             vm.Project = project;
             vm.Tickets = tickets;
+            vm.ProjectId = id.Value;
+
 
             if (project == null)
             {
@@ -173,6 +185,7 @@ namespace ZapX.Controllers
         }
 
         //AddUser Get
+        [Authorize(Roles = "Admin, Project Manager")]
         public async Task<IActionResult> AssignUsers(int id)
         {
             var model = new ManageProjectUsersViewModel();
@@ -200,8 +213,6 @@ namespace ZapX.Controllers
                     var currentMembers = await _context.Projects.Include(p => p.ProjectUsers).FirstOrDefaultAsync(p => p.Id == model.Project.Id);
                     List<string> memberIds = currentMembers?.ProjectUsers.Select(u => u.UserId).ToList();
 
-                    //memberIds.ForEach(async (i) => await _projectService.RemoveUsers(i, model.Project.Id));
-
                     foreach (string id in memberIds)
                     {
                         await _projectService.RemoveUsers(id, model.Project.Id);
@@ -223,6 +234,7 @@ namespace ZapX.Controllers
 
 
         //RemoveUserFromProject Get
+        [Authorize(Roles = "Admin, Project Manager")]
         public async Task<IActionResult> RemoveUsers(int? id)
         {
             if (id == null)

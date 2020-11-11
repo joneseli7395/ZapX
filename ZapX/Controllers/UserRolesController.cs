@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -12,6 +13,8 @@ using ZapX.Services;
 
 namespace ZapX.Controllers
 {
+    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class UserRolesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -24,7 +27,7 @@ namespace ZapX.Controllers
             _rolesService = rolesService;
             _userManager = userManager;
         }
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ManageUserRoles()
         {
             List<ManageUserRolesViewModel> model = new List<ManageUserRolesViewModel>();

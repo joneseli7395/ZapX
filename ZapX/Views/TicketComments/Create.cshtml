@@ -4,13 +4,12 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
 
-<h4>TicketComment</h4>
+<h4>Commenting on ticket: @*@Model.Ticket.Title*@</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" asp-controller="TicketComments" asp-route-id="">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="TicketId"/>
             <input type="hidden" asp-for="UserId" />

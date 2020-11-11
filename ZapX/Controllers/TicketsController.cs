@@ -2,35 +2,68 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using ZapX.Data;
 using ZapX.Models;
+using ZapX.Models.ViewModels;
+using ZapX.Services;
+using ZapX.Utilities;
 
 namespace ZapX.Controllers
 {
+    [Authorize]
     public class TicketsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<BTUser> _userManager;
+        private readonly IBTHistoryService _historyService;
 
-        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager)
+        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTHistoryService historyService)
         {
             _context = context;
             _userManager = userManager;
+            _historyService = historyService;
         }
 
         // GET: Tickets
-        public async Task<IActionResult> Index()
+        [Authorize]
+        public async Task<IActionResult> Index(string userId)
         {
-            var applicationDbContext = _context.Tickets.Include(t => t.DeveloperUser).Include(t => t.OwnerUser).Include(t => t.Project).Include(t => t.TicketPriority).Include(t => t.TicketStatus).Include(t => t.TicketType);
-            return View(await applicationDbContext.ToListAsync());
+            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName");
+            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName");
+            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name");
+            ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name");
+            ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name");
+            ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name");
+
+            var vm = new TicketProjectsViewModel();
+            //UserId for arg for action
+            var projectIds = new List<int>();
+            var model = new List<Ticket>();
+            var userProjects = _context.ProjectUsers.Where(pu => pu.UserId == userId).ToList();
+            foreach (var record in userProjects)
+            {
+                projectIds.Add(_context.Projects.Find(record.ProjectId).Id);
+            }
+            foreach (var id in projectIds)
+            {
+                var tickets = _context.Tickets.Where(t => t.ProjectId == id).ToList();
+                model.AddRange(tickets);
+            }
+
+            vm.Tickets = await _context.Tickets.Include(t => t.DeveloperUser).Include(t => t.OwnerUser).Include(t => t.Project).Include(t => t.TicketPriority).Include(t => t.TicketStatus).Include(t => t.TicketType).ToListAsync();
+            return View(vm);
         }
 
         // GET: Tickets/Details/5
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -46,7 +79,11 @@ namespace ZapX.Controllers
                 .Include(t => t.TicketStatus)
                 .Include(t => t.TicketType)
                 .Include(t => t.Comments).ThenInclude(tc => tc.User)
+                .Include(t => t.Attachments)
+                .Include(t => t.Histories)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
+
             if (ticket == null)
             {
                 return NotFound();
@@ -80,10 +117,14 @@ namespace ZapX.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,ProjectId,Description,TicketTypeId,TicketPriorityId,TicketStatusId,DeveloperUserId")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("Title,ProjectId,Description,TicketTypeId,TicketPriorityId,TicketStatusId,DeveloperUserId")] Ticket ticket, IFormFile attachment, int? id)
         {
             if (ModelState.IsValid)
             {
+                if (id != null)
+                {
+                    ticket.ProjectId = id.Value;
+                }
                 ticket.Created = DateTime.Now;
                 if (ticket.TicketPriorityId == 0 || ticket.TicketStatusId == 0)
                 {
@@ -112,6 +153,7 @@ namespace ZapX.Controllers
         }
 
         // GET: Tickets/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -145,6 +187,8 @@ namespace ZapX.Controllers
                 return NotFound();
             }
 
+            Ticket oldTicket = await _context.Tickets.AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticket.Id);
+
             if (ModelState.IsValid)
             {
                 try
@@ -164,14 +208,19 @@ namespace ZapX.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction("Details", "Tickets", new { Id = ticket.Id});
+
+                //Add history
+                string userId = _userManager.GetUserId(User);
+                await _historyService.AddHistory(oldTicket, ticket, userId);
+
+                return RedirectToAction("Details", "Tickets", new { Id = ticket.Id });
             }
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
-            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.OwnerUserId);
+            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.DeveloperUserId);
+            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.OwnerUserId);
             ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name", ticket.ProjectId);
-            ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Id", ticket.TicketPriorityId);
-            ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Id", ticket.TicketStatusId);
-            ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Id", ticket.TicketTypeId);
+            ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
+            ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
+            ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name", ticket.TicketTypeId);
             return View(ticket);
         }
 
@@ -190,6 +239,8 @@ namespace ZapX.Controllers
                 .Include(t => t.TicketPriority)
                 .Include(t => t.TicketStatus)
                 .Include(t => t.TicketType)
+                .Include(t => t.Comments).ThenInclude(t => t.User)
+                .Include(t => t.Attachments)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (ticket == null)
             {
@@ -208,7 +259,7 @@ namespace ZapX.Controllers
             var projectId = ticket.ProjectId;
             _context.Tickets.Remove(ticket);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Details", "Projects", new { Id = projectId});
+            return RedirectToAction("Details", "Projects", new { id = projectId });
         }
 
         private bool TicketExists(int id)

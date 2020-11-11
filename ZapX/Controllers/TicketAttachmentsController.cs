@@ -1,22 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ZapX.Data;
 using ZapX.Models;
+using ZapX.Utilities;
 
 namespace ZapX.Controllers
 {
+    [Authorize]
     public class TicketAttachmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<BTUser> _userManager;
 
-        public TicketAttachmentsController(ApplicationDbContext context)
+        public TicketAttachmentsController(ApplicationDbContext context, UserManager<BTUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: TicketAttachments
@@ -47,11 +55,20 @@ namespace ZapX.Controllers
         }
 
         // GET: TicketAttachments/Create
-        public IActionResult Create()
+        public IActionResult Create(int? id)
         {
-            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description");
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
-            return View();
+            var model = new TicketAttachment();
+            if (id == null)
+            {
+                ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description");
+            }
+            else
+            {
+                model.TicketId = (int)id;
+                model.FileData = new Byte[64];
+            }
+            //ViewData["UserId"] = new SelectList(_context.Users, "Id", "FullName");
+            return View(model);
         }
 
         // POST: TicketAttachments/Create
@@ -59,17 +76,28 @@ namespace ZapX.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FilePath,FileData,Description,Created,TicketId,UserId")] TicketAttachment ticketAttachment)
+        public async Task<IActionResult> Create([Bind("Description,TicketId")] TicketAttachment ticketAttachment, IFormFile attachment)
         {
             if (ModelState.IsValid)
             {
+                var memoryStream = new MemoryStream();
+                attachment.CopyTo(memoryStream);
+                byte[] bytes = memoryStream.ToArray();
+                memoryStream.Close();
+                memoryStream.Dispose();
+                var binary = Convert.ToBase64String(bytes);
+                var ext = Path.GetExtension(attachment.FileName);
+
+                ticketAttachment.FilePath = $"data:image/{ext};base64,{binary}";
+                ticketAttachment.FileData = bytes;
+                ticketAttachment.Created = DateTimeOffset.Now;
+                ticketAttachment.UserId = _userManager.GetUserId(User);
+
                 _context.Add(ticketAttachment);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Details", "Tickets", new { id = ticketAttachment.TicketId });
             }
-            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketAttachment.TicketId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketAttachment.UserId);
-            return View(ticketAttachment);
+            return NotFound();
         }
 
         // GET: TicketAttachments/Edit/5
