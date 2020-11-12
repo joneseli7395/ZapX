@@ -48,10 +48,11 @@ namespace ZapX.Services
             return users;
         }
 
-        public async Task<ICollection<BTUser>> UsersNotInRole(IdentityRole role)
+        public async Task<IEnumerable<BTUser>> UsersNotInRole(string roleName)
         {
-            //var roleId = await _roleManager.GetRoleIdAsync(role);
-            return await _userManager.Users.Where(u => IsUserInRole(u, role.Name).Result == false).ToListAsync();
+            var inRole = await _userManager.GetUsersInRoleAsync(roleName);
+            var users = await _userManager.Users.ToListAsync();
+            return users.Except(inRole);
         }
     }
 }

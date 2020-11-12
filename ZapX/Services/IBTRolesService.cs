@@ -14,6 +14,6 @@ namespace ZapX.Services
         public Task<IEnumerable<string>> ListUserRoles(BTUser user);
         public Task<bool> RemoveUserFromRole(BTUser user, string roleName);
         public Task<ICollection<BTUser>> UsersInRole(string roleName);
-        public Task<ICollection<BTUser>> UsersNotInRole(IdentityRole role);
+        public Task<IEnumerable<BTUser>> UsersNotInRole(string roleName);
     }
 }

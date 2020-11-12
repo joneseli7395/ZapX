@@ -13,7 +13,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using ZapX.Data;
+using ZapX.Data.Migrations;
 using ZapX.Models;
+using ZapX.Services;
+using Roles = ZapX.Data.Roles;
 
 namespace ZapX.Areas.Identity.Pages.Account
 {
@@ -80,6 +84,8 @@ namespace ZapX.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    await _userManager.AddToRoleAsync(user, Roles.NewUser.ToString());
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

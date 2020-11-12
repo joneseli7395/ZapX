@@ -67,7 +67,7 @@ else
         </div>
     </div>
     <div class="col">
-        <table class="table table-striped table-bordered">
+        <table class="myTable">
             <thead>
                 <tr>
                     <th>
@@ -196,15 +196,15 @@ else
                                     <span asp-validation-for="Ticket.Description" class="text-danger"></span>
                                 </div>
                                 @*<div class="form-group">
-                                        <label asp-for="Created" class="control-label"></label>
-                                        <input asp-for="Created" class="form-control" />
-                                        <span asp-validation-for="Created" class="text-danger"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label asp-for="Updated" class="control-label"></label>
-                                        <input asp-for="Updated" class="form-control" />
-                                        <span asp-validation-for="Updated" class="text-danger"></span>
-                                    </div>*@
+                                <label asp-for="Created" class="control-label"></label>
+                                <input asp-for="Created" class="form-control" />
+                                <span asp-validation-for="Created" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Updated" class="control-label"></label>
+                                <input asp-for="Updated" class="form-control" />
+                                <span asp-validation-for="Updated" class="text-danger"></span>
+                            </div>*@
                                 <div class="form-group">
                                     <label asp-for="Ticket.TicketTypeId" class="control-label"></label>
                                     <select asp-for="Ticket.TicketTypeId" class="form-control" asp-items="ViewBag.TicketTypeId"></select>
@@ -226,9 +226,9 @@ else
                                     <input type="hidden" asp-for="Ticket.TicketStatusId" />
                                 }
                                 @*<div class="form-group">
-                                        <label asp-for="OwnerUserId" class="control-label"></label>
-                                        <select asp-for="OwnerUserId" class="form-control" asp-items="ViewBag.OwnerUserId"></select>
-                                    </div>*@
+                                <label asp-for="OwnerUserId" class="control-label"></label>
+                                <select asp-for="OwnerUserId" class="form-control" asp-items="ViewBag.OwnerUserId"></select>
+                            </div>*@
                                 <div class="form-group">
                                     <label asp-for="Ticket.DeveloperUserId" class="control-label"></label>
                                     <select asp-for="Ticket.DeveloperUserId" class="form-control" asp-items="ViewBag.DeveloperUserId"></select>
@@ -240,6 +240,9 @@ else
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>

@@ -1,65 +1,250 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<BTUser> SignInManager
+@inject UserManager<BTUser> UserManager
+@*<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>@ViewData["Title"] - ZapX</title>
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+        <link rel="stylesheet" href="~/css/site.css" />
+        <link href="~/css/bootstrap-dark.min.css" rel="stylesheet" />
+        <link href="~/css/app-dark.min.css" rel="stylesheet" />
+    </head>
+    <body>
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
+                <div class="container">
+                    <a class="navbar-brand text-light" asp-area="" asp-controller="Home" asp-action="Index">ZapX</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                        <partial name="_LoginPartial" />
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-area="" asp-controller="Projects" asp-action="Index">Projects</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-area="" asp-controller="Tickets" asp-action="Index">Tickets</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-area="" asp-controller="UserRoles" asp-action="ManageUserRoles">Manage Roles</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div class="container">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+
+        <footer class="border-top footer text-muted bg-dark">
+            <div class="container">
+                &copy; 2020 - ZapX - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        <script src="~/js/app.js"></script>
+        @RenderSection("Scripts", required: false)
+        <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('.myTable').DataTable({
+                    searching: true
+                });
+
+                $('#anotherTable').DataTable({
+                    searching: false
+                });
+
+            });
+        </script>
+    </body>
+    </html>*@
+
+
+<!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ZapX</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+    <link href="~/css/bootstrap-dark.min.css" rel="stylesheet" />
+    <link href="~/css/app-dark.min.css" rel="stylesheet" />
+    <link href="~/css/icons.min.css" rel="stylesheet" />
+
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand text-light" asp-area="" asp-controller="Home" asp-action="Index">ZapX</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    <partial name="_LoginPartial" />
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+
+<body data-sidebar="dark">
+
+    <!-- Begin page -->
+    <div id="layout-wrapper">
+
+        <header id="page-topbar">
+            <div class="navbar-header">
+                <div class="d-flex">
+                    <div class="navbar-brand-box">
+
+                        <a href="index.html" class="logo logo-light">
+                            <span class="logo-sm">
+                                <img src="~/images/logo.svg" alt="" height="22" />
+                            </span>
+                            <span class="logo-lg">
+                                <img src="~/images/logo-light.png" alt="" height="20" />
+                            </span>
+                        </a>
+                    </div>
+
+                    <button type="button" class="btn btn-sm px-3 font-size-24 header-item waves-effect" id="vertical-menu-btn">
+                        <i class="mdi mdi-backburger"></i>
+                    </button>
+
+                </div>
+
+                <div class="d-flex">
+
+                    <div class="d-inline-block">
+                        <h5><span class="badge badge-danger float-right">v1.4.1</span></h5>
+                    </div>
+
+                </div>
+                <ul>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <li>
+                            <a asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello, @User.Identity.Name!</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Projects" asp-action="Index">Projects</a>
+                        <li>
+                            <a data-target="#logout" data-toggle="modal">Logout</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Tickets" asp-action="Index">Tickets</a>
+                    }
+                    else
+                    {
+                        <li>
+                            <a asp-area="Identity" asp-page="/Account/Register">Register</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="UserRoles" asp-action="ManageUserRoles">Manage Roles</a>
+                        <li>
+                            <a asp-area="Identity" asp-page="/Account/Login">Login</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </header>
+
+        <!-- ========== Left Sidebar Start ========== -->
+        <div class="vertical-menu">
+
+            <div data-simplebar class="h-100">
+
+                <!--- Sidemenu -->
+                <div id="sidebar-menu">
+                    <!-- Left Menu Start -->
+                    @*<partial name="_LoginPartial" />*@
+                    <ul class="metismenu list-unstyled" id="side-menu">
+                        <li>
+                            <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li>
+                            <a asp-area="" asp-controller="Projects" asp-action="Index">Projects</a>
+                        </li>
+                        <li>
+                            <a asp-area="" asp-controller="Tickets" asp-action="Index">Tickets</a>
+                        </li>
+                        <li>
+                            <a asp-area="" asp-controller="UserRoles" asp-action="ManageUserRoles">Manage Roles</a>
                         </li>
                     </ul>
+
+
+                </div>
+                <!-- Sidebar -->
+            </div>
+        </div>
+        <!-- Left Sidebar End -->
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <div class="main-content">
+            <div class="page-content">
+                <div class="container-fluid">
+                    <main role="main" class="pb-3">
+                        @RenderBody()
+                    </main>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+
+
+            <footer class="footer">
+                <div class="container">
+                    <div class="row">
+                        <div class="col text-center">
+                            &copy; 2020 - ZapX - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <!-- end main content-->
+    <div class="modal fade" id="logout">
+        <div class="modal modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-center bg-dark">
+                    <h4 class="modal-title text-light">Logout</h4>
+                    <button type="button" class="btn bg-dark text-light" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col">
+                                <p>Are you sure you want to logout?</p>
+                                <form class="form-group" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                    <button type="submit" class="btn btn-danger text-light">Logout</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted bg-dark">
-        <div class="container">
-            &copy; 2020 - ZapX - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/app.js"></script>
+    <script src="~/js/metisMenu.min.js"></script>
+    <script src="~/js/simplebar.min.js"></script>
+    <script src="~/js/waves.min.js"></script>
     @RenderSection("Scripts", required: false)
-    @*<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function () {
-            $('#myTable').DataTable();
-        });
+            $('.myTable').DataTable({
+                searching: true
+            });
 
-        $('table').dataTable({
-            searching: false
-        })
-    </script>*@
+            $('#anotherTable').DataTable({
+                searching: false
+            });
+
+        });
+    </script>
+
 </body>
 </html>

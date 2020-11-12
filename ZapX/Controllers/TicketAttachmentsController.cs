@@ -92,6 +92,7 @@ namespace ZapX.Controllers
                 ticketAttachment.FileData = bytes;
                 ticketAttachment.Created = DateTimeOffset.Now;
                 ticketAttachment.UserId = _userManager.GetUserId(User);
+                ticketAttachment.Description = Path.GetFileNameWithoutExtension(attachment.FileName);
 
                 _context.Add(ticketAttachment);
                 await _context.SaveChangesAsync();
@@ -178,12 +179,12 @@ namespace ZapX.Controllers
         // POST: TicketAttachments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, int ticketId)
         {
             var ticketAttachment = await _context.TicketAttachments.FindAsync(id);
             _context.TicketAttachments.Remove(ticketAttachment);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Details", "Tickets", new { id = ticketId});
         }
 
         private bool TicketAttachmentExists(int id)

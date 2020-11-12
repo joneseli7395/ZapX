@@ -24,12 +24,14 @@ namespace ZapX.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<BTUser> _userManager;
         private readonly IBTHistoryService _historyService;
+        private readonly IBTAccessService _accessService;
 
-        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTHistoryService historyService)
+        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTHistoryService historyService, IBTAccessService accessService)
         {
             _context = context;
             _userManager = userManager;
             _historyService = historyService;
+            _accessService = accessService;
         }
 
         // GET: Tickets
@@ -70,26 +72,32 @@ namespace ZapX.Controllers
             {
                 return NotFound();
             }
-
-            var ticket = await _context.Tickets
-                .Include(t => t.DeveloperUser)
-                .Include(t => t.OwnerUser)
-                .Include(t => t.Project)
-                .Include(t => t.TicketPriority)
-                .Include(t => t.TicketStatus)
-                .Include(t => t.TicketType)
-                .Include(t => t.Comments).ThenInclude(tc => tc.User)
-                .Include(t => t.Attachments)
-                .Include(t => t.Histories)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-
-            if (ticket == null)
+            var userId = _userManager.GetUserId(User);
+            var roleName = (await _userManager.GetRolesAsync(await _userManager.GetUserAsync(User))).FirstOrDefault();
+            if (await _accessService.CanInteractTicket(userId, (int)id, roleName))
             {
-                return NotFound();
-            }
+                var ticket = await _context.Tickets
+                    .Include(t => t.DeveloperUser)
+                    .Include(t => t.OwnerUser)
+                    .Include(t => t.Project)
+                    .Include(t => t.TicketPriority)
+                    .Include(t => t.TicketStatus)
+                    .Include(t => t.TicketType)
+                    .Include(t => t.Comments).ThenInclude(tc => tc.User)
+                    .Include(t => t.Attachments)
+                    .Include(t => t.Histories)
+                    .FirstOrDefaultAsync(m => m.Id == id);
 
-            return View(ticket);
+
+                if (ticket == null)
+                {
+                    return NotFound();
+                }
+
+                return View(ticket);
+            }
+            TempData["InvalidAccess"] = "You have attempted to access a ticket outside of your authorization";
+            return RedirectToAction("Index");
         }
 
         // GET: Tickets/Create
@@ -117,7 +125,7 @@ namespace ZapX.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,ProjectId,Description,TicketTypeId,TicketPriorityId,TicketStatusId,DeveloperUserId")] Ticket ticket, IFormFile attachment, int? id)
+        public async Task<IActionResult> Create([Bind("Title,ProjectId,Description,TicketTypeId,TicketPriorityId,TicketStatusId,DeveloperUserId")] Ticket ticket, int? id)
         {
             if (ModelState.IsValid)
             {
@@ -162,17 +170,28 @@ namespace ZapX.Controllers
             }
 
             var ticket = await _context.Tickets.FindAsync(id);
-            if (ticket == null)
+            var userId = _userManager.GetUserId(User);
+            var roleName = (await _userManager.GetRolesAsync(await _userManager.GetUserAsync(User))).FirstOrDefault();
+            if (await _accessService.CanInteractTicket(userId, (int)id, roleName))
             {
-                return NotFound();
+
+                ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.DeveloperUserId);
+                ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.OwnerUserId);
+                ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name", ticket.ProjectId);
+                ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
+                ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
+                ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name", ticket.TicketTypeId);
+
+                if (ticket == null)
+                {
+                    return NotFound();
+                }
+
+                return View(ticket);
             }
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.DeveloperUserId);
-            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.OwnerUserId);
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name", ticket.ProjectId);
-            ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
-            ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
-            ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name", ticket.TicketTypeId);
-            return View(ticket);
+
+            TempData["InvalidAccess"] = "You have attempted to access a ticket outside of your authorization";
+            return RedirectToAction("Index");
         }
 
         // POST: Tickets/Edit/5

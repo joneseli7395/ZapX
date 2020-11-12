@@ -1,5 +1,14 @@
-﻿@model IEnumerable<ZapX.Models.Project>
+﻿@using Microsoft.AspNetCore.Identity
+@using ZapX.Services
+@model IEnumerable<ZapX.Models.Project>
+@inject UserManager<BTUser> UserManager
+@inject IBTAccessService AccessService
 
+@{
+    ViewData["Title"] = "Index";
+    var userId = UserManager.GetUserId(User);
+    var roleName = (await UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).FirstOrDefault();
+}
 @{
     ViewData["Title"] = "Index";
 }
@@ -24,6 +33,9 @@
                 <th>
                     @Html.DisplayNameFor(model => model.ImageData)
                 </th>*@
+            <th>
+                Details
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -40,9 +52,13 @@
                     <td>
                         @Html.DisplayFor(modelItem => item.ImageData)
                     </td>*@
-                <td>
-                    <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a> 
-                </td>
+                @if (await AccessService.CanInteractTicket(userId, item.Id, roleName))
+                {
+                    <td>
+                        <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    </td>
+                }
+
             </tr>
         }
     </tbody>

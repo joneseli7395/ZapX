@@ -13,7 +13,6 @@ using ZapX.Services;
 
 namespace ZapX.Controllers
 {
-    [Authorize]
     [Authorize(Roles = "Admin")]
     public class UserRolesController : Controller
     {
@@ -27,7 +26,7 @@ namespace ZapX.Controllers
             _rolesService = rolesService;
             _userManager = userManager;
         }
-        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> ManageUserRoles()
         {
             List<ManageUserRolesViewModel> model = new List<ManageUserRolesViewModel>();

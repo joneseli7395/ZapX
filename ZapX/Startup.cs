@@ -41,6 +41,7 @@ namespace ZapX
             services.AddScoped<IBTRolesService, BTRolesService>();
             services.AddScoped<IBTProjectService, BTProjectService>();
             services.AddScoped<IBTHistoryService, BTHistoryService>();
+            services.AddScoped<IBTAccessService, BTAccessService>();
 
             services.AddControllersWithViews();
             services.AddRazorPages();
