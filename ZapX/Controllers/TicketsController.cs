@@ -25,13 +25,17 @@ namespace ZapX.Controllers
         private readonly UserManager<BTUser> _userManager;
         private readonly IBTHistoryService _historyService;
         private readonly IBTAccessService _accessService;
+        private readonly IBTTicketService _ticketService;
+        private readonly IBTRolesService _rolesService;
 
-        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTHistoryService historyService, IBTAccessService accessService)
+        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTHistoryService historyService, IBTAccessService accessService, IBTTicketService ticketService, IBTRolesService rolesService)
         {
             _context = context;
             _userManager = userManager;
             _historyService = historyService;
             _accessService = accessService;
+            _ticketService = ticketService;
+            _rolesService = rolesService;
         }
 
         // GET: Tickets
@@ -62,6 +66,92 @@ namespace ZapX.Controllers
 
             vm.Tickets = await _context.Tickets.Include(t => t.DeveloperUser).Include(t => t.OwnerUser).Include(t => t.Project).Include(t => t.TicketPriority).Include(t => t.TicketStatus).Include(t => t.TicketType).ToListAsync();
             return View(vm);
+        }
+
+        // GET: MyTickets
+        public async Task<IActionResult> MyTickets()
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return View("Index");
+            }
+            if (User.IsInRole("ProjectManager"))
+            {
+                return View("Index", _ticketService.ListProjectManagerTickets(_userManager.GetUserId(User)));
+            }
+            if (User.IsInRole("Developer"))
+            {
+                return View("Index", _ticketService.ListDeveloperTickets(_userManager.GetUserId(User)));
+            }
+            if (User.IsInRole("Submitter"))
+            {
+                return View("Index", _ticketService.ListSubmitterTickets(_userManager.GetUserId(User)));
+            }
+
+            return NotFound();
+        }
+
+        // GET: UserTickets
+        public async Task<IActionResult> UserTickets()
+        {
+            var userId = _userManager.GetUserId(User); // Get the currently logged in user.
+            var myRole = await _rolesService.ListUserRoles(_context.Users.Find(userId));
+            var test = myRole.FirstOrDefault();
+            List<Ticket> model;
+            switch (test)
+            {
+                case "Admin":
+                    model = _context.Tickets
+                        .Include(t => t.OwnerUser)
+                        .Include(t => t.TicketPriority)
+                        .Include(t => t.TicketStatus)
+                        .Include(t => t.TicketType)
+                        .Include(t => t.Project)
+                        .ToList();
+                    break;
+                // Snippet to get ticket for project manager - special case for roles
+                case "Project Manager":
+                    var projectIds = new List<int>();
+                    model = new List<Ticket>();
+                    var userProjects = _context.ProjectUsers.Where(pu => pu.UserId == userId).ToList();
+                    foreach (var record in userProjects)
+                    {
+                        projectIds.Add(_context.Projects.Find(record.ProjectId).Id);
+                    }
+                    foreach (var id in projectIds)
+                    {
+                        var tickets = _context.Tickets.Where(t => t.ProjectId == id)
+                            .Include(t => t.OwnerUser)
+                            .Include(t => t.TicketPriority)
+                            .Include(t => t.TicketStatus)
+                            .Include(t => t.TicketType)
+                            .Include(t => t.Project)
+                            .ToList();
+                        model.AddRange(tickets);
+                    }
+                    break;
+                case "Developer":
+                    model = _context.Tickets.Where(t => t.DeveloperUserId == userId)
+                        .Include(t => t.OwnerUser)
+                        .Include(t => t.TicketPriority)
+                        .Include(t => t.TicketStatus)
+                        .Include(t => t.TicketType)
+                        .Include(t => t.Project)
+                        .ToList();
+                    break;
+                case "Submitter":
+                    model = _context.Tickets.Where(t => t.OwnerUserId == userId)
+                        .Include(t => t.OwnerUser)
+                        .Include(t => t.TicketPriority)
+                        .Include(t => t.TicketStatus)
+                        .Include(t => t.TicketType)
+                        .Include(t => t.Project)
+                        .ToList();
+                    break;
+                default:
+                    return RedirectToAction("Index", "Home");
+            }
+            return View(model);
         }
 
         // GET: Tickets/Details/5
@@ -206,7 +296,13 @@ namespace ZapX.Controllers
                 return NotFound();
             }
 
-            Ticket oldTicket = await _context.Tickets.AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticket.Id);
+            Ticket oldTicket = await _context.Tickets
+                .Include(t => t.TicketPriority)
+                .Include(t => t.TicketStatus)
+                .Include(t => t.TicketType)
+                .Include(t => t.Project)
+                .Include(t => t.DeveloperUser)
+                .AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticket.Id);
 
             if (ModelState.IsValid)
             {
@@ -230,17 +326,25 @@ namespace ZapX.Controllers
 
                 //Add history
                 string userId = _userManager.GetUserId(User);
-                await _historyService.AddHistory(oldTicket, ticket, userId);
+                Ticket newTicket = await _context.Tickets
+                    .Include(t => t.TicketPriority)
+                    .Include(t => t.TicketStatus)
+                    .Include(t => t.TicketType)
+                    .Include(t => t.Project)
+                    .Include(t => t.DeveloperUser)
+                    .AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticket.Id);
 
-                return RedirectToAction("Details", "Tickets", new { Id = ticket.Id });
+                await _historyService.AddHistory(oldTicket, newTicket, userId);
+
+                return RedirectToAction("Details", "Tickets", new { id = ticket.Id });
             }
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.DeveloperUserId);
-            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.OwnerUserId);
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name", ticket.ProjectId);
-            ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
-            ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
-            ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name", ticket.TicketTypeId);
-            return View(ticket);
+            //ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.DeveloperUserId);
+            //ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.OwnerUserId);
+            //ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name", ticket.ProjectId);
+            //ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
+            //ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
+            //ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name", ticket.TicketTypeId);
+            return NotFound();
         }
 
         // GET: Tickets/Delete/5

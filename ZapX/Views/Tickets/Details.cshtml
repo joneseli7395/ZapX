@@ -11,7 +11,7 @@
     <h5>Ticket: <b>@Model.Title</b></h5>
     <h6>Comments: <b>@Model.Comments.Count()</b></h6>
     <h6>Attachments: <b>@Model.Attachments.Count()</b></h6>
-    <a class="btn btn-info text-light" data-target="#history" data-toggle="modal">Ticket History</a>
+    <a class="btn btn-info text-dark" data-target="#history" data-toggle="modal">Ticket History</a>
     <hr />
     <dl class="row">
         @*<dt class = "col-sm-2">
@@ -88,7 +88,7 @@
                                 <h5 class="modal-title">File Name: @attachment.Description</h5>
                             </div>
                             <div class="modal-body text-center">
-                                <img src="@attachment.FilePath" alt="@attachment.Description" />
+                                <img src="@attachment.FilePath" alt="@attachment.Description" style="width:400px;height:400px"/>
                                 <hr />
                             </div>
                             <p>Submitted by <b>@attachment.User.FullName</b> on <b>@attachment.Created.ToString("MMM dd")</b> at <b>@attachment.Created.ToString("h:mm tt")</b></p>
@@ -116,6 +116,11 @@
                 @comment.User.FullName
                 <span> : </span>
                 @comment.Comment
+                <span> : </span>
+                <form asp-action="Delete" asp-controller="TicketComments" asp-route-id="@comment.Id" class="form-group">
+                    @Html.Hidden("TicketId", Model.Id)
+                    <input type="submit" value="Remove" class="btn btn-danger" />
+                </form>
                 <br />
             }
         </dd>
@@ -137,7 +142,7 @@
                     </div>
                     <div class="form-group">
                         <input type="submit" value="Submit Comment" class="btn btn-success" />
-                        <a class="btn btn-success text-light" data-toggle="modal" data-target="#attachment">Add Attachment</a>
+                        <a class="btn btn-success text-dark" data-toggle="modal" data-target="#attachment">Add Attachment</a>
                     </div>
                 </form>
             </div>
@@ -158,15 +163,15 @@
 <div class="modal" id="history">
     <div class="modal modal-lg modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header text-center bg-dark">
-                <h4 class="modal-title text-light">Ticket Edit History</h4>
-                <button type="button" class="btn bg-dark text-light" data-dismiss="modal">&times;</button>
+            <div class="modal-header text-center">
+                <h4 class="modal-title">Ticket Edit History</h4>
+                <button type="button" class="btn" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="container">
                     <div class="row">
                         <div class="col">
-                            <table class="table table-striped hover" id="anotherTable">
+                            <table id="anotherTable">
                                 <thead>
                                     <tr>
                                         <th>
@@ -187,7 +192,6 @@
                                         <th>
                                             User
                                         </th>
-                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -212,11 +216,6 @@
                                             <td>
                                                 @Html.DisplayFor(modelItem => item.User.FullName)
                                             </td>
-                                            <td>
-                                                @*<a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                                                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                                                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>*@
-                                            </td>
                                         </tr>
                                     }
                                 </tbody>
@@ -236,8 +235,8 @@
 <div class="modal" id="attachment">
     <div class="modal modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header text-center bg-dark">
-                <h4 class="modal-title text-light">Add an Attachment</h4>
+            <div class="modal-header text-center">
+                <h4 class="modal-title">Add an Attachment</h4>
                 <button type="button" class="btn bg-dark text-light" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
@@ -292,3 +291,6 @@
         </div>
     </div>
 </div>
+
+
+

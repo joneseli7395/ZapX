@@ -25,6 +25,12 @@ namespace ZapX.Controllers
             return View();
         }
 
+        [AllowAnonymous]
+        public IActionResult LandingPage()
+        {
+            return View();
+        }
+
         public IActionResult Privacy()
         {
             return View();

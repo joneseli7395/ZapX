@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +13,13 @@ namespace ZapX.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<BTUser> _userManager;
+        private readonly IEmailSender _emailSender;
 
-        public BTHistoryService(ApplicationDbContext context, UserManager<BTUser> userManager)
+        public BTHistoryService(ApplicationDbContext context, UserManager<BTUser> userManager, IEmailSender emailSender)
         {
             _context = context;
             _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         public async Task AddHistory(Ticket oldTicket, Ticket newTicket, string userId)
@@ -57,11 +60,28 @@ namespace ZapX.Services
                         TicketId = newTicket.Id,
                         Property = "Developer",
                         OldValue = "No Developer Assigned",
-                        NewValue = _context.Users.Find(newTicket.DeveloperUserId).FullName,
+                        NewValue = newTicket.DeveloperUser.FullName,
                         Created = DateTimeOffset.Now,
                         UserId = userId
                     };
                     await _context.TicketHistories.AddAsync(history);
+
+                    Notification notification = new Notification
+                    {
+                        TicketId = newTicket.Id,
+                        Description = "You have a new ticket.",
+                        Created = DateTimeOffset.Now,
+                        SenderId = userId,
+                        RecipientId = newTicket.DeveloperUserId
+                    };
+                    await _context.Notifications.AddAsync(notification);
+
+                    //Send an email
+                    string devEmail = newTicket.DeveloperUser.Email;
+                    string subject = "New Ticket Assignment";
+                    string message = $"You have a new ticket for project: {newTicket.Project.Name}";
+
+                    await _emailSender.SendEmailAsync(devEmail, subject, message);
                 }
                 else if (String.IsNullOrWhiteSpace(newTicket.DeveloperUserId))
                 {
@@ -69,7 +89,7 @@ namespace ZapX.Services
                     {
                         TicketId = newTicket.Id,
                         Property = "Developer",
-                        OldValue = _context.Users.Find(oldTicket.DeveloperUserId).FullName,
+                        OldValue = oldTicket.DeveloperUser.FullName,
                         NewValue = "No Developer Assigned",
                         Created = DateTimeOffset.Now,
                         UserId = userId
@@ -82,12 +102,29 @@ namespace ZapX.Services
                     {
                         TicketId = newTicket.Id,
                         Property = "Developer",
-                        OldValue = _context.Users.Find(oldTicket.DeveloperUserId).FullName,
-                        NewValue = _context.Users.Find(newTicket.DeveloperUserId).FullName,
+                        OldValue = oldTicket.DeveloperUser.FullName,
+                        NewValue = newTicket.DeveloperUser.FullName,
                         Created = DateTimeOffset.Now,
                         UserId = userId
                     };
                     await _context.TicketHistories.AddAsync(history);
+
+                    Notification notification = new Notification
+                    {
+                        TicketId = newTicket.Id,
+                        Description = "You have a new ticket.",
+                        Created = DateTimeOffset.Now,
+                        SenderId = userId,
+                        RecipientId = newTicket.DeveloperUserId
+                    };
+                    await _context.Notifications.AddAsync(notification);
+
+                    //Send an email
+                    string devEmail = newTicket.DeveloperUser.Email;
+                    string subject = "New Ticket Assignment";
+                    string message = $"You have a new ticket for project: {newTicket.Project.Name}";
+
+                    await _emailSender.SendEmailAsync(devEmail, subject, message);
                 }
             }
 
@@ -97,8 +134,8 @@ namespace ZapX.Services
                 {
                     TicketId = newTicket.Id,
                     Property = "Priority",
-                    OldValue = _context.TicketPriorities.Find(oldTicket.TicketPriorityId).Name,
-                    NewValue = _context.TicketPriorities.Find(newTicket.TicketPriorityId).Name,
+                    OldValue = oldTicket.TicketPriority.Name,
+                    NewValue = newTicket.TicketPriority.Name,
                     Created = DateTimeOffset.Now,
                     UserId = userId
                 };
@@ -111,8 +148,8 @@ namespace ZapX.Services
                 {
                     TicketId = newTicket.Id,
                     Property = "Status",
-                    OldValue = _context.TicketStatuses.Find(oldTicket.TicketStatusId).Name,
-                    NewValue = _context.TicketStatuses.Find(newTicket.TicketStatusId).Name,
+                    OldValue = oldTicket.TicketStatus.Name,
+                    NewValue = newTicket.TicketStatus.Name,
                     Created = DateTimeOffset.Now,
                     UserId = userId
                 };
@@ -125,13 +162,14 @@ namespace ZapX.Services
                 {
                     TicketId = newTicket.Id,
                     Property = "Type",
-                    OldValue = _context.TicketTypes.Find(oldTicket.TicketTypeId).Name,
-                    NewValue = _context.TicketTypes.Find(newTicket.TicketTypeId).Name,
+                    OldValue = oldTicket.TicketType.Name,
+                    NewValue = newTicket.TicketType.Name,
                     Created = DateTimeOffset.Now,
                     UserId = userId
                 };
                 await _context.TicketHistories.AddAsync(history);
             }
+
 
             //if (oldTicket.Comments != newTicket.Comments)
             //{

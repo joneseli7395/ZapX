@@ -22,6 +22,7 @@ namespace ZapX.Services
         public async Task<bool> AddUserToRole(BTUser user, string roleName)
         {
             var result = await _userManager.AddToRoleAsync(user, roleName);
+            //user.Role = roleName;
             return result.Succeeded;
         }
 

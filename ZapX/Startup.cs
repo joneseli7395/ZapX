@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ZapX.Models;
 using ZapX.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace ZapX
 {
@@ -42,6 +43,11 @@ namespace ZapX
             services.AddScoped<IBTProjectService, BTProjectService>();
             services.AddScoped<IBTHistoryService, BTHistoryService>();
             services.AddScoped<IBTAccessService, BTAccessService>();
+            services.AddScoped<IBTTicketService, BTTicketService>();
+
+            //Email Register
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.AddTransient<IEmailSender, EmailService>();
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -73,7 +79,7 @@ namespace ZapX
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=LandingPage}/{id?}");
                 endpoints.MapRazorPages();
             });
         }

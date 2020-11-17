@@ -36,10 +36,10 @@
 </div>
 <br />
 <div>
-    @if (User.IsInRole("Admin"))
+    @*@if (User.IsInRole("Admin"))
     {
         <a class="btn btn-danger text-light" data-toggle="modal" data-target="#delete" >Delete</a>
-    }
+    }*@
     <a class="btn btn-info" asp-action="Details" asp-route-id="@Model.Id">Back to Details</a>
 </div>
 

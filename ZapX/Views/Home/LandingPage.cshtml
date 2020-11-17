@@ -1,0 +1,108 @@
+﻿ <!-- Page Content -->
+<div class="container">
+
+    <!-- Heading Row -->
+    <div class="row align-items-center my-5">
+        <div class="col-lg-7">
+            <img class="img-fluid rounded mb-4 mb-lg-0" src="~/images/ZapX-PixTeller.png" />
+        </div>
+        <!-- /.col-lg-8 -->
+        <div class="col-lg-5">
+            <h1 class="font-weight-light">About the Application</h1>
+            <p>This Ticket Management application uses the <b>MVC</b> design pattern built in Microsoft's <b>ASP.Net</b> framework. The backend is written in <b>C#</b>. In the cards below, you can read about each role's responsibilities, as well as interact with the application as each role to see the differences in views and functionality.<br /> Learn more about the technologies used <a href="#" data-toggle="modal" data-target="#tech">here</a>.</p>
+            <hr />
+            <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">Register</a>
+            <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </div>
+        <!-- /.col-md-4 -->
+    </div>
+    <!-- /.row -->
+    <!-- Call to Action Well -->
+    <div class="card text-white bg-secondary my-5 py-4 text-center">
+        <div class="card-body">
+            <p class="text-white m-0">This call to action card is a great place to showcase some important information or display a clever tagline!</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h1 class="font-weight-light text-center">Demo Users</h1>
+            <hr />
+        </div>
+    </div>
+    <!-- Content Row -->
+    <div class="row">
+        <div class="col-md-3 mb-5">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title">Admin</h2>
+                    <p class="card-text">A user in the Admin role will have the ability to create and edit any and every project and ticket, as well as the ability to assign registered users to any role necessary. There are no restrictions for this user.</p>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="btn btn-primary btn-sm">Demo Admin</a>
+                </div>
+            </div>
+        </div>
+        <!-- /.col-md-4 -->
+        <div class="col-md-3 mb-5">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title">Project Manager</h2>
+                    <p class="card-text">A user in the role of Project Manager will have the ability to create and edit any ticket found within a project that they are assigned to, as well as assign developers to tickets as they created.</p>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="btn btn-primary btn-sm">Demo Project Manager</a>
+                </div>
+            </div>
+        </div>
+        <!-- /.col-md-4 -->
+        <div class="col-md-3 mb-5">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title">Developer</h2>
+                    <p class="card-text">A user in the role of Developer will have the ability to view the details of any ticket that they have been assigned to, as well as updating the status field of those tickets.</p>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="btn btn-primary btn-sm">Demo Developer</a>
+                </div>
+            </div>
+        </div>
+        <!-- /.col-md-4 -->
+        <div class="col-md-3 mb-5">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title">Submitter</h2>
+                    <p class="card-text">A user in the role of Submitter will have the ability to create a ticket for a project that they are assigned to, with their input fields being limited.</p>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="btn btn-primary btn-sm">Demo Submitter</a>
+                </div>
+            </div>
+        </div>
+        <!-- /.col-md-4 -->
+    </div>
+    <!-- /.row -->
+
+</div>
+
+<div class="modal" id="tech">
+    <div class="modal modal-dialog-centered modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Technologies Used</h4>
+                <button type="button" class="btn" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <p>Some shit will go here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger float-right" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

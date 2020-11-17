@@ -168,12 +168,12 @@ namespace ZapX.Controllers
         // POST: TicketComments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, int ticketId)
         {
             var ticketComment = await _context.TicketComments.FindAsync(id);
             _context.TicketComments.Remove(ticketComment);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Details", "Tickets",  new { Id = ticketId });
         }
 
         private bool TicketCommentExists(int id)
