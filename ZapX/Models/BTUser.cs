@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using ZapX.Extensions;
 
 namespace ZapX.Models
 {
@@ -23,10 +24,10 @@ namespace ZapX.Models
         public string FullName { get { return $"{FirstName} {LastName}"; } }
 
         [Display(Name = "Avatar")]
+        [MaxFileSize(2000)]
+        [AllowedExtensions(new string[] { ".jpg", ".png"})]
         public string ImagePath { get; set; }
         public byte[] ImageData { get; set; }
-
-        public string Role { get; set; }
 
         public List<ProjectUser> ProjectUsers { get; set; }
     }

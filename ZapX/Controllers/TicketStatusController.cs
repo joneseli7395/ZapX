@@ -58,13 +58,21 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name")] TicketStatus ticketStatus)
         {
-            if (ModelState.IsValid)
+            if (!User.IsInRole("Demo"))
             {
-                _context.Add(ticketStatus);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(ticketStatus);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index", "Tickets");
+                }
+                return View(ticketStatus);
             }
-            return View(ticketStatus);
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Index", "Tickets");
+            }
         }
 
         // GET: TicketStatus/Edit/5
@@ -141,10 +149,18 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var ticketStatus = await _context.TicketStatuses.FindAsync(id);
-            _context.TicketStatuses.Remove(ticketStatus);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if (!User.IsInRole("Demo"))
+            {
+                var ticketStatus = await _context.TicketStatuses.FindAsync(id);
+                _context.TicketStatuses.Remove(ticketStatus);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index", "Tickets");
+            }
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Index", "Tickets");
+            }
         }
 
         private bool TicketStatusExists(int id)

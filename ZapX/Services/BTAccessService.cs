@@ -24,7 +24,13 @@ namespace ZapX.Services
             {
                 case "Admin":
                     return true;
-                case "Project Manager":
+                case "ProjectManager":
+                    if(await _context.ProjectUsers.Where(pu => pu.UserId == userId && pu.ProjectId == projectId).AnyAsync())
+                    {
+                        return true;
+                    }
+                    return false;
+                case "Developer":
                     if(await _context.ProjectUsers.Where(pu => pu.UserId == userId && pu.ProjectId == projectId).AnyAsync())
                     {
                         return true;
@@ -44,7 +50,7 @@ namespace ZapX.Services
                 case "Admin":
                     result = true;
                     break;
-                case "Project Manager":
+                case "ProjectManager":
                     var projectId = (await _context.Tickets.FindAsync(ticketId)).ProjectId;
 
                     if (await _context.ProjectUsers.Where(pu => pu.UserId == userId && pu.ProjectId == projectId).AnyAsync())

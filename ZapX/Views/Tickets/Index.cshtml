@@ -6,8 +6,6 @@
 
 @{
     ViewData["Title"] = "Index";
-    var userId = UserManager.GetUserId(User);
-    var roleName = (await UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).FirstOrDefault();
 }
 
 <h1>All Tickets</h1>
@@ -23,11 +21,16 @@ else
 
 @if (User.Identity.IsAuthenticated)
 {
-    <p>
-        <a class="btn btn-success text-light" data-toggle="modal" data-target="#create">Create a Ticket</a>
-    </p>
+    <a class="btn btn-success text-light" data-toggle="modal" data-target="#create">Create a Ticket</a>
 }
-
+@if (User.IsInRole("Admin"))
+{
+    <a class="btn btn-info text-light" data-toggle="modal" data-target="#priority">Ticket Priorities</a>
+    <a class="btn btn-info text-light" data-toggle="modal" data-target="#statuses">Ticket Statuses</a>
+    <a class="btn btn-info text-light" data-toggle="modal" data-target="#type">Ticket Types</a>
+}
+<hr />
+<br />
 <table class="myTable">
     <thead>
         <tr>
@@ -108,6 +111,9 @@ else
     </tbody>
 </table>
 
+
+@*LOOK AT ALL THESE MODALS*@
+
 <div class="modal" id="create">
     <div class="modal modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -135,16 +141,6 @@ else
                                     <input asp-for="Ticket.Description" class="form-control" />
                                     <span asp-validation-for="Ticket.Description" class="text-danger"></span>
                                 </div>
-                                @*<div class="form-group">
-                                        <label asp-for="Created" class="control-label"></label>
-                                        <input asp-for="Created" class="form-control" />
-                                        <span asp-validation-for="Created" class="text-danger"></span>
-                                    </div>
-                                    <div class="form-group">
-                                        <label asp-for="Updated" class="control-label"></label>
-                                        <input asp-for="Updated" class="form-control" />
-                                        <span asp-validation-for="Updated" class="text-danger"></span>
-                                    </div>*@
                                 <div class="form-group">
                                     <label asp-for="Ticket.TicketTypeId" class="control-label"></label>
                                     <select asp-for="Ticket.TicketTypeId" class="form-control" asp-items="ViewBag.TicketTypeId"></select>
@@ -164,15 +160,6 @@ else
                                         <select asp-for="Ticket.DeveloperUserId" class="form-control" asp-items="ViewBag.DeveloperUserId"></select>
                                     </div>
                                 }
-                                @*else
-                                    {
-                                        <input type="hidden" asp-for="Ticket.TicketPriorityId" />
-                                        <input type="hidden" asp-for="Ticket.TicketStatusId" />
-                                    }*@
-                                @*<div class="form-group">
-                                        <label asp-for="OwnerUserId" class="control-label"></label>
-                                        <select asp-for="OwnerUserId" class="form-control" asp-items="ViewBag.OwnerUserId"></select>
-                                    </div>*@
                                 <div class="form-group">
                                     <input type="submit" value="Create" class="btn btn-info" />
                                     <button type="button" class="btn btn-danger float-right" data-dismiss="modal">Cancel</button>
@@ -181,6 +168,192 @@ else
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*PRIORITIES*@
+<div class="modal fade" id="priority">
+    <div class="modal modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Ticket Priorities</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="text-center">Create New Priority</h5>
+                        <form asp-action="Create" asp-controller="TicketPriorities">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <input name="Name" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Create" class="btn btn-success" />
+                            </div>
+                        </form>
+                    </div>
+                </div><hr />
+                <div class="row">
+                    <div class="col">
+                        <h5 class="text-center">Existing Priorities</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>
+                                        Name
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.TicketPriorities)
+                                {
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Name)
+                                        </td>
+                                        <td>
+                                            <form asp-action="Delete" asp-controller="TicketPriorities" asp-route-id="@item.Id" class="form-group">
+                                                <input type="submit" value="Remove" class="btn btn-danger btn-sm" />
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info float-right" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*STATUSES*@
+<div class="modal fade" id="statuses">
+    <div class="modal modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Ticket Statuses</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="text-center">Create New Status</h5>
+                        <form asp-action="Create" asp-controller="TicketStatus">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <input name="Name" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Create" class="btn btn-success" />
+                            </div>
+                        </form>
+                    </div>
+                </div><hr />
+                <div class="row">
+                    <div class="col">
+                        <h5 class="text-center">Existing Statuses</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>
+                                        Name
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.TicketStatuses)
+                                {
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Name)
+                                        </td>
+                                        <td>
+                                            <form asp-action="Delete" asp-controller="TicketStatus" asp-route-id="@item.Id" class="form-group">
+                                                <input type="submit" value="Remove" class="btn btn-danger btn-sm" />
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info float-right" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*TYPES*@
+<div class="modal fade" id="type">
+    <div class="modal modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Ticket Types</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col">
+                        <h5 class="text-center">Create New Type</h5>
+                        <form asp-action="Create" asp-controller="TicketTypes">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <input name="Name" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Create" class="btn btn-success" />
+                            </div>
+                        </form>
+                    </div>
+                </div><hr />
+                <div class="row">
+                    <div class="col">
+                        <h5 class="text-center">Existing Types</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>
+                                        Name
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.TicketTypes)
+                                {
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Name)
+                                        </td>
+                                        <td>
+                                            <form asp-action="Delete" asp-controller="TicketTypes" asp-route-id="@item.Id" class="form-group">
+                                                <input type="submit" value="Remove" class="btn btn-danger btn-sm" />
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info float-right" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

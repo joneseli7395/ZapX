@@ -11,5 +11,8 @@ namespace ZapX.Models.ViewModels
         public BTUser User { get; set; }
         public MultiSelectList Roles { get; set; }
         public string[] SelectedRoles { get; set; }
+        public MultiSelectList Projects { get; set; }
+        public string[] SelectedProjects { get; set; }
+        public Project Project { get; set; }
     }
 }

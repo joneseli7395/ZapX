@@ -56,7 +56,7 @@
                         @Html.DisplayFor(modelItem => item.ImageData)
                     </td>*@
                 <td>
-                    @foreach(var user in item.ProjectUsers)
+                    @foreach (var user in item.ProjectUsers)
                     {
                         @user.User.FullName <br />
                     }

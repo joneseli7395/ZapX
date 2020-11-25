@@ -78,27 +78,35 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Description,TicketId")] TicketAttachment ticketAttachment, IFormFile attachment)
         {
-            if (ModelState.IsValid)
+            if (!User.IsInRole("Demo"))
             {
-                var memoryStream = new MemoryStream();
-                attachment.CopyTo(memoryStream);
-                byte[] bytes = memoryStream.ToArray();
-                memoryStream.Close();
-                memoryStream.Dispose();
-                var binary = Convert.ToBase64String(bytes);
-                var ext = Path.GetExtension(attachment.FileName);
+                if (ModelState.IsValid)
+                {
+                    var memoryStream = new MemoryStream();
+                    attachment.CopyTo(memoryStream);
+                    byte[] bytes = memoryStream.ToArray();
+                    memoryStream.Close();
+                    memoryStream.Dispose();
+                    var binary = Convert.ToBase64String(bytes);
+                    var ext = Path.GetExtension(attachment.FileName);
 
-                ticketAttachment.FilePath = $"data:image/{ext};base64,{binary}";
-                ticketAttachment.FileData = bytes;
-                ticketAttachment.Created = DateTimeOffset.Now;
-                ticketAttachment.UserId = _userManager.GetUserId(User);
-                ticketAttachment.Description = Path.GetFileNameWithoutExtension(attachment.FileName);
+                    ticketAttachment.FilePath = $"data:image/{ext};base64,{binary}";
+                    ticketAttachment.FileData = bytes;
+                    ticketAttachment.Created = DateTimeOffset.Now;
+                    ticketAttachment.UserId = _userManager.GetUserId(User);
+                    ticketAttachment.Description = Path.GetFileNameWithoutExtension(attachment.FileName);
 
-                _context.Add(ticketAttachment);
-                await _context.SaveChangesAsync();
+                    _context.Add(ticketAttachment);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Details", "Tickets", new { id = ticketAttachment.TicketId });
+                }
+                return NotFound();
+            }
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
                 return RedirectToAction("Details", "Tickets", new { id = ticketAttachment.TicketId });
             }
-            return NotFound();
         }
 
         // GET: TicketAttachments/Edit/5
@@ -126,34 +134,45 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,FilePath,FileData,Description,Created,TicketId,UserId")] TicketAttachment ticketAttachment)
         {
-            if (id != ticketAttachment.Id)
+            if (!User.IsInRole("Demo"))
             {
-                return NotFound();
-            }
 
-            if (ModelState.IsValid)
-            {
-                try
+
+                if (id != ticketAttachment.Id)
                 {
-                    _context.Update(ticketAttachment);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+
+                if (ModelState.IsValid)
                 {
-                    if (!TicketAttachmentExists(ticketAttachment.Id))
+                    try
                     {
-                        return NotFound();
+                        _context.Update(ticketAttachment);
+                        await _context.SaveChangesAsync();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!TicketAttachmentExists(ticketAttachment.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
+                    return RedirectToAction(nameof(Index));
+
                 }
-                return RedirectToAction(nameof(Index));
+                ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketAttachment.TicketId);
+                ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketAttachment.UserId);
+                return View(ticketAttachment);
             }
-            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketAttachment.TicketId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketAttachment.UserId);
-            return View(ticketAttachment);
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Details", "Projects", new { id = ticketAttachment.TicketId });
+            }
         }
 
         // GET: TicketAttachments/Delete/5
@@ -182,9 +201,17 @@ namespace ZapX.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id, int ticketId)
         {
             var ticketAttachment = await _context.TicketAttachments.FindAsync(id);
-            _context.TicketAttachments.Remove(ticketAttachment);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Details", "Tickets", new { id = ticketId});
+            if (!User.IsInRole("Demo"))
+            {
+                _context.TicketAttachments.Remove(ticketAttachment);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Details", "Tickets", new { id = ticketId });
+            }
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Details", "Projects", new { id = ticketId });
+            }
         }
 
         private bool TicketAttachmentExists(int id)

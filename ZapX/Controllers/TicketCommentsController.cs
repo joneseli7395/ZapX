@@ -74,20 +74,28 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Comment,TicketId,UserId")] TicketComment ticketComment)
         {
-            if (ModelState.IsValid)
+            if (!User.IsInRole("Demo"))
             {
-                ticketComment.Created = DateTime.Now;
-                if(ticketComment.UserId == null)
+                if (ModelState.IsValid)
                 {
-                    ticketComment.UserId = _userManager.GetUserId(User);
+                    ticketComment.Created = DateTime.Now;
+                    if (ticketComment.UserId == null)
+                    {
+                        ticketComment.UserId = _userManager.GetUserId(User);
+                    }
+                    _context.Add(ticketComment);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Details", "Tickets", new { Id = ticketComment.TicketId });
                 }
-                _context.Add(ticketComment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Details", "Tickets", new { Id = ticketComment.TicketId});
+                //ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
+                //ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketComment.UserId);
+                return NotFound();
             }
-            //ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
-            //ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketComment.UserId);
-            return NotFound();
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Details", "Projects", new { id = ticketComment.TicketId });
+            }
         }
 
         // GET: TicketComments/Edit/5
@@ -115,34 +123,42 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Comment,Created,TicketId,UserId")] TicketComment ticketComment)
         {
-            if (id != ticketComment.Id)
+            if (!User.IsInRole("Demo"))
             {
-                return NotFound();
-            }
+                if (id != ticketComment.Id)
+                {
+                    return NotFound();
+                }
 
-            if (ModelState.IsValid)
-            {
-                try
+                if (ModelState.IsValid)
                 {
-                    _context.Update(ticketComment);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TicketCommentExists(ticketComment.Id))
+                    try
                     {
-                        return NotFound();
+                        _context.Update(ticketComment);
+                        await _context.SaveChangesAsync();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!TicketCommentExists(ticketComment.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
+                    return RedirectToAction(nameof(Index));
                 }
-                return RedirectToAction(nameof(Index));
+                ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
+                ViewData["UserId"] = new SelectList(_context.Users, "Id", "Name", ticketComment.UserId);
+                return View(ticketComment);
             }
-            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Name", ticketComment.UserId);
-            return View(ticketComment);
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Details", "Projects", new { id = ticketComment.TicketId });
+            }
         }
 
         // GET: TicketComments/Delete/5
@@ -171,9 +187,17 @@ namespace ZapX.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id, int ticketId)
         {
             var ticketComment = await _context.TicketComments.FindAsync(id);
-            _context.TicketComments.Remove(ticketComment);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Details", "Tickets",  new { Id = ticketId });
+            if (!User.IsInRole("Demo"))
+            {
+                _context.TicketComments.Remove(ticketComment);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Details", "Tickets", new { Id = ticketId });
+            }
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Details", "Projects", new { id = ticketId });
+            }
         }
 
         private bool TicketCommentExists(int id)

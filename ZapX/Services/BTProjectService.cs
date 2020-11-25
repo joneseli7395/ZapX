@@ -13,11 +13,13 @@ namespace ZapX.Services
     public class BTProjectService : IBTProjectService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IBTRolesService _rolesService;
 
         //Constructor
-        public BTProjectService(ApplicationDbContext context)
+        public BTProjectService(ApplicationDbContext context, IBTRolesService rolesService)
         {
             _context = context;
+            _rolesService = rolesService;
         }
 
         //Methods
@@ -43,7 +45,7 @@ namespace ZapX.Services
             //return _context.ProjectUsers.Where(pu => pu.UserId == userId && pu.ProjectId == projectId).Any();
         }
 
-        public async Task<ICollection<Project>> ListUserProjects(string userId)
+        public async Task<List<Project>> ListUserProjects(string userId)
         {
             BTUser user = await _context.Users
                 .Include(p => p.ProjectUsers).ThenInclude(p => p.Project)
@@ -120,6 +122,21 @@ namespace ZapX.Services
                 }
             }
             return Users;
+        }
+
+        public async Task<ICollection<BTUser>> DevelopersOnProjectAsync(int projectId)
+        {
+            var devs = _rolesService.UsersInRole("Developer").Result.ToList();
+            var devsOnProject = new List<BTUser>();
+
+            foreach (var dev in devs)
+            {
+                if (await IsUserOnProject(dev.Id, projectId))
+                {
+                    devsOnProject.Add(dev);
+                }
+            }
+            return devsOnProject;
         }
 
     }

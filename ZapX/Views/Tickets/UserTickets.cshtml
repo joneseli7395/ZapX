@@ -1,27 +1,27 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using ZapX.Services
-@model IEnumerable<ZapX.Models.Ticket>
+@model ZapX.Models.ViewModels.TicketProjectsViewModel
 @inject UserManager<BTUser> UserManager
 @inject IBTAccessService AccessService
 
 
-@{ 
-    ViewData["Title"] = "MyTickets";
-    var userId = UserManager.GetUserId(User);
-    var user = await UserManager.GetUserAsync(User);
-    var roleName = (await UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).FirstOrDefault();
-}
+@{ ViewData["Title"] = "MyTickets";
+                var userId = UserManager.GetUserId(User);
+                var user = await UserManager.GetUserAsync(User);
+                var roleName = (await UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).FirstOrDefault(); }
 
 
 <h1>@user.FullName's Tickets</h1>
 
-
+<p>
+    <a class="btn btn-success text-light" data-toggle="modal" data-target="#create">Create a Ticket</a>
+</p>
 
 <table class="myTable table-dark hover">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                @Html.DisplayNameFor(model => model.Ticket.Title)
             </th>
             @*<th>
                     @Html.DisplayNameFor(model => model.Description)
@@ -35,20 +35,20 @@
             <th>
                 @Html.DisplayNameFor(model => model.Project)
             </th>
-            @*<th>
-                    @Html.DisplayNameFor(model => model.TicketType)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.TicketPriority)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.TicketStatus)
-                </th>*@
             <th>
-                @Html.DisplayNameFor(model => model.OwnerUser)
+                @Html.DisplayNameFor(model => model.Ticket.TicketType)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DeveloperUser)
+                @Html.DisplayNameFor(model => model.Ticket.TicketPriority)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Ticket.TicketStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Ticket.OwnerUser)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Ticket.DeveloperUser)
             </th>
 
             <th>
@@ -58,7 +58,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Tickets)
         {
 <tr>
     <td>
@@ -76,15 +76,15 @@
     <td>
         @Html.DisplayFor(modelItem => item.Project.Name)
     </td>
-    @*<td>
-            @Html.DisplayFor(modelItem => item.TicketType.Id)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.TicketPriority.Id)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.TicketStatus.Id)
-        </td>*@
+    <td>
+        @Html.DisplayFor(modelItem => item.TicketType.Id)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.TicketPriority.Id)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.TicketStatus.Id)
+    </td>
     <td>
         @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
     </td>
@@ -95,15 +95,73 @@
     <td>
         @if (await AccessService.CanInteractTicket(userId, item.Id, roleName))
         {
-            <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
-        }
+<a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>}
     </td>
 
 
-</tr>}
+</tr>
+}
     </tbody>
 </table>
 
+
+<div class="modal" id="create">
+    <div class="modal modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <h4 class="modal-title">Create a Ticket</h4>
+                <button type="button" class="btn" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <form asp-action="Create" asp-controller="Tickets" enctype="multipart/form-data">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div class="form-group">
+                                    <label asp-for="Ticket.ProjectId" class="control-label"></label>
+                                    <select asp-for="Ticket.ProjectId" class="form-control" asp-items="ViewBag.ProjectId"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Ticket.Title" class="control-label"></label>
+                                    <input asp-for="Ticket.Title" class="form-control" />
+                                    <span asp-validation-for="Ticket.Title" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Ticket.Description" class="control-label"></label>
+                                    <input asp-for="Ticket.Description" class="form-control" />
+                                    <span asp-validation-for="Ticket.Description" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Ticket.TicketTypeId" class="control-label"></label>
+                                    <select asp-for="Ticket.TicketTypeId" class="form-control" asp-items="ViewBag.TicketTypeId"></select>
+                                </div>
+                                @if (User.IsInRole("Admin") || User.IsInRole("ProjectManager"))
+                                {
+                    <div class="form-group">
+                        <label asp-for="Ticket.TicketPriorityId" class="control-label"></label>
+                        <select asp-for="Ticket.TicketPriorityId" class="form-control" asp-items="ViewBag.TicketPriorityId"></select>
+                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="Ticket.TicketStatusId" class="control-label"></label>
+                                        <select asp-for="Ticket.TicketStatusId" class="form-control" asp-items="ViewBag.TicketStatusId"></select>
+                                    </div>
+                                                    <div class="form-group">
+                                                        <label asp-for="Ticket.DeveloperUserId" class="control-label"></label>
+                                                        <select asp-for="Ticket.DeveloperUserId" class="form-control" asp-items="ViewBag.DeveloperUserId"></select>
+                                                    </div>}
+                                <div class="form-group">
+                                    <input type="submit" value="Create" class="btn btn-info" />
+                                    <button type="button" class="btn btn-danger float-right" data-dismiss="modal">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 

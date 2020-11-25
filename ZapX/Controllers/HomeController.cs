@@ -28,7 +28,14 @@ namespace ZapX.Controllers
         [AllowAnonymous]
         public IActionResult LandingPage()
         {
-            return View();
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                return View();
+            }
         }
 
         public IActionResult Privacy()

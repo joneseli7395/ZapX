@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using ZapX.Extensions;
 
 namespace ZapX.Models
 {
@@ -16,13 +17,17 @@ namespace ZapX.Models
 
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Please give the project an appropriate name")]
         [StringLength(50)]
         [Display(Name = "Project Name")]
         public string Name { get; set; }
 
         [Display(Name = "Project Image")]
         public string ImagePath { get; set; }
+
+        [Display(Name = "Upload Image")]
+        [MaxFileSize(2000)]
+        [AllowedExtensions(new string[] {".jpg", ".png"})]
         public byte[] ImageData { get; set; }
 
         public List<ProjectUser> ProjectUsers { get; set; }

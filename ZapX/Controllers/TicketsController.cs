@@ -27,8 +27,9 @@ namespace ZapX.Controllers
         private readonly IBTAccessService _accessService;
         private readonly IBTTicketService _ticketService;
         private readonly IBTRolesService _rolesService;
+        private readonly IBTProjectService _projectService;
 
-        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTHistoryService historyService, IBTAccessService accessService, IBTTicketService ticketService, IBTRolesService rolesService)
+        public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTHistoryService historyService, IBTAccessService accessService, IBTTicketService ticketService, IBTRolesService rolesService, IBTProjectService projectService)
         {
             _context = context;
             _userManager = userManager;
@@ -36,6 +37,7 @@ namespace ZapX.Controllers
             _accessService = accessService;
             _ticketService = ticketService;
             _rolesService = rolesService;
+            _projectService = projectService;
         }
 
         // GET: Tickets
@@ -65,6 +67,9 @@ namespace ZapX.Controllers
             }
 
             vm.Tickets = await _context.Tickets.Include(t => t.DeveloperUser).Include(t => t.OwnerUser).Include(t => t.Project).Include(t => t.TicketPriority).Include(t => t.TicketStatus).Include(t => t.TicketType).ToListAsync();
+            vm.TicketPriorities = await _context.TicketPriorities.ToListAsync();
+            vm.TicketStatuses = await _context.TicketStatuses.ToListAsync();
+            vm.TicketTypes = await _context.TicketTypes.ToListAsync();
             return View(vm);
         }
 
@@ -94,6 +99,7 @@ namespace ZapX.Controllers
         // GET: UserTickets
         public async Task<IActionResult> UserTickets()
         {
+            var vm = new TicketProjectsViewModel();
             var userId = _userManager.GetUserId(User); // Get the currently logged in user.
             var myRole = await _rolesService.ListUserRoles(_context.Users.Find(userId));
             var test = myRole.FirstOrDefault();
@@ -103,6 +109,7 @@ namespace ZapX.Controllers
                 case "Admin":
                     model = _context.Tickets
                         .Include(t => t.OwnerUser)
+                        .Include(t => t.DeveloperUser)
                         .Include(t => t.TicketPriority)
                         .Include(t => t.TicketStatus)
                         .Include(t => t.TicketType)
@@ -122,6 +129,7 @@ namespace ZapX.Controllers
                     {
                         var tickets = _context.Tickets.Where(t => t.ProjectId == id)
                             .Include(t => t.OwnerUser)
+                            .Include(t => t.DeveloperUser)
                             .Include(t => t.TicketPriority)
                             .Include(t => t.TicketStatus)
                             .Include(t => t.TicketType)
@@ -141,7 +149,7 @@ namespace ZapX.Controllers
                     break;
                 case "Submitter":
                     model = _context.Tickets.Where(t => t.OwnerUserId == userId)
-                        .Include(t => t.OwnerUser)
+                        .Include(t => t.DeveloperUser)
                         .Include(t => t.TicketPriority)
                         .Include(t => t.TicketStatus)
                         .Include(t => t.TicketType)
@@ -151,7 +159,8 @@ namespace ZapX.Controllers
                 default:
                     return RedirectToAction("Index", "Home");
             }
-            return View(model);
+            vm.Tickets = await _context.Tickets.Include(t => t.DeveloperUser).Include(t => t.OwnerUser).Include(t => t.Project).Include(t => t.TicketPriority).Include(t => t.TicketStatus).Include(t => t.TicketType).ToListAsync();
+            return View(vm);
         }
 
         // GET: Tickets/Details/5
@@ -198,7 +207,16 @@ namespace ZapX.Controllers
             ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName");
             if (id == null)
             {
-                ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name");
+                if (User.IsInRole("Admin"))
+                {
+                    ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name");
+                }
+                else
+                {
+                    var userId = _userManager.GetUserId(User);
+                    var records = _context.ProjectUsers.Where(pu => pu.UserId == userId).Select(pu => pu.Project).ToList();
+                    ViewData["ProjectId"] = new SelectList(records, "Id", "Name");
+                }
             }
             else
             {
@@ -217,29 +235,37 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Title,ProjectId,Description,TicketTypeId,TicketPriorityId,TicketStatusId,DeveloperUserId")] Ticket ticket, int? id)
         {
-            if (ModelState.IsValid)
+            if (!User.IsInRole("Demo"))
             {
-                if (id != null)
+                if (ModelState.IsValid)
                 {
-                    ticket.ProjectId = id.Value;
+                    if (id != null)
+                    {
+                        ticket.ProjectId = id.Value;
+                    }
+                    ticket.Created = DateTime.Now;
+                    if (ticket.TicketPriorityId == 0 || ticket.TicketStatusId == 0)
+                    {
+                        ticket.TicketPriorityId = _context.TicketPriorities.Where(tp => tp.Name == "Low").FirstOrDefault().Id;
+                        ticket.TicketStatusId = _context.TicketStatuses.Where(tp => tp.Name == "Unassigned").FirstOrDefault().Id;
+                    }
+                    if (ticket.OwnerUserId == null)
+                    {
+                        ticket.OwnerUserId = _userManager.GetUserId(User);
+                    }
+                    _context.Add(ticket);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Details", "Projects", new { Id = ticket.ProjectId });
                 }
-                ticket.Created = DateTime.Now;
-                if (ticket.TicketPriorityId == 0 || ticket.TicketStatusId == 0)
+                else
                 {
-                    ticket.TicketPriorityId = _context.TicketPriorities.Where(tp => tp.Name == "Low").FirstOrDefault().Id;
-                    ticket.TicketStatusId = _context.TicketStatuses.Where(tp => tp.Name == "Unassigned").FirstOrDefault().Id;
+                    return NotFound();
                 }
-                if (ticket.OwnerUserId == null)
-                {
-                    ticket.OwnerUserId = _userManager.GetUserId(User);
-                }
-                _context.Add(ticket);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Details", "Projects", new { Id = ticket.ProjectId });
             }
             else
             {
-                return NotFound();
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Details", "Projects", new { id = ticket.ProjectId });
             }
             //ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Name", ticket.DeveloperUserId);
             //ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "Name", ticket.OwnerUserId);
@@ -259,23 +285,31 @@ namespace ZapX.Controllers
                 return NotFound();
             }
 
-            var ticket = await _context.Tickets.FindAsync(id);
             var userId = _userManager.GetUserId(User);
-            var roleName = (await _userManager.GetRolesAsync(await _userManager.GetUserAsync(User))).FirstOrDefault();
+            var roleName = (await _userManager.GetRolesAsync(await _userManager.GetUserAsync(User))).FirstOrDefault(r => r != "Demo");
+
             if (await _accessService.CanInteractTicket(userId, (int)id, roleName))
             {
-
-                ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.DeveloperUserId);
+                var ticket = await _context.Tickets.FindAsync(id);
+                if (ticket == null)
+                {
+                    return NotFound();
+                }
+                var availableUsers = new List<BTUser>();
+                if(User.IsInRole("ProjectManager"))
+                {
+                    availableUsers = (List<BTUser>)await _projectService.DevelopersOnProjectAsync(ticket.ProjectId);
+                }
+                else
+                {
+                    availableUsers = (List<BTUser>)await _projectService.UsersOnProject(ticket.ProjectId);
+                }
+                ViewData["DeveloperUserId"] = new SelectList(availableUsers, "Id", "FullName", ticket.DeveloperUserId);
                 ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.OwnerUserId);
                 ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name", ticket.ProjectId);
                 ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
                 ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
                 ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name", ticket.TicketTypeId);
-
-                if (ticket == null)
-                {
-                    return NotFound();
-                }
 
                 return View(ticket);
             }
@@ -291,42 +325,14 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,Created,ProjectId,TicketTypeId,TicketPriorityId,TicketStatusId,OwnerUserId,DeveloperUserId")] Ticket ticket)
         {
-            if (id != ticket.Id)
+            if (!User.IsInRole("Demo"))
             {
-                return NotFound();
-            }
-
-            Ticket oldTicket = await _context.Tickets
-                .Include(t => t.TicketPriority)
-                .Include(t => t.TicketStatus)
-                .Include(t => t.TicketType)
-                .Include(t => t.Project)
-                .Include(t => t.DeveloperUser)
-                .AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticket.Id);
-
-            if (ModelState.IsValid)
-            {
-                try
+                if (id != ticket.Id)
                 {
-                    ticket.Updated = DateTime.Now;
-                    _context.Update(ticket);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TicketExists(ticket.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
 
-                //Add history
-                string userId = _userManager.GetUserId(User);
-                Ticket newTicket = await _context.Tickets
+                Ticket oldTicket = await _context.Tickets
                     .Include(t => t.TicketPriority)
                     .Include(t => t.TicketStatus)
                     .Include(t => t.TicketType)
@@ -334,8 +340,48 @@ namespace ZapX.Controllers
                     .Include(t => t.DeveloperUser)
                     .AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticket.Id);
 
-                await _historyService.AddHistory(oldTicket, newTicket, userId);
+                if (ModelState.IsValid)
+                {
+                    try
+                    {
+                        ticket.Updated = DateTime.Now;
+                        _context.Update(ticket);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!TicketExists(ticket.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
 
+                    //Add history
+                    string userId = _userManager.GetUserId(User);
+                    Ticket newTicket = await _context.Tickets
+                        .Include(t => t.TicketPriority)
+                        .Include(t => t.TicketStatus)
+                        .Include(t => t.TicketType)
+                        .Include(t => t.Project)
+                        .Include(t => t.DeveloperUser)
+                        .AsNoTracking().FirstOrDefaultAsync(t => t.Id == ticket.Id);
+
+                    await _historyService.AddHistory(oldTicket, newTicket, userId);
+
+                    return RedirectToAction("Details", "Tickets", new { id = ticket.Id });
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
                 return RedirectToAction("Details", "Tickets", new { id = ticket.Id });
             }
             //ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.DeveloperUserId);
@@ -344,7 +390,6 @@ namespace ZapX.Controllers
             //ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
             //ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
             //ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name", ticket.TicketTypeId);
-            return NotFound();
         }
 
         // GET: Tickets/Delete/5
@@ -380,9 +425,17 @@ namespace ZapX.Controllers
         {
             var ticket = await _context.Tickets.FindAsync(id);
             var projectId = ticket.ProjectId;
-            _context.Tickets.Remove(ticket);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Details", "Projects", new { id = projectId });
+            if (!User.IsInRole("Demo"))
+            {
+                _context.Tickets.Remove(ticket);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Details", "Projects", new { id = projectId });
+            }
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Details", "Projects", new { id = projectId });
+            }
         }
 
         private bool TicketExists(int id)

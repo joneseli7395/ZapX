@@ -58,13 +58,21 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name")] TicketType ticketType)
         {
-            if (ModelState.IsValid)
+            if(!User.IsInRole("Demo"))
             {
-                _context.Add(ticketType);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(ticketType);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index", "Tickets");
+                }
+                return View(ticketType);
             }
-            return View(ticketType);
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Index", "Tickets");
+            }
         }
 
         // GET: TicketTypes/Edit/5
@@ -141,10 +149,18 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var ticketType = await _context.TicketTypes.FindAsync(id);
-            _context.TicketTypes.Remove(ticketType);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if(!User.IsInRole("Demo"))
+            {
+                var ticketType = await _context.TicketTypes.FindAsync(id);
+                _context.TicketTypes.Remove(ticketType);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index", "Tickets");
+            }
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Index", "Tickets");
+            }
         }
 
         private bool TicketTypeExists(int id)

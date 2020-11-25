@@ -1,33 +1,129 @@
-﻿@model IEnumerable<ZapX.Models.ViewModels.ManageUserRolesViewModel>
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<ZapX.Models.ViewModels.ManageUserRolesViewModel>
+@inject UserManager<BTUser> UserManager
 
-<div class="row">
-    @foreach (var btuser in Model)
-    {
-        <div class="card col-6" style="margin:2px">
-            <div class="card-body">
-                <h2 class="m-t-0 h3"><b>Assign Roles to @btuser.User.FullName</b></h2>
-                <p class="text-muted font-13 m-b-30">
-                    This form displays the current roles assigned to the user: @btuser.User.FullName. Use the dropdown to select the roles that this user should be assigned. Once roles are selected, click "Assign Roles" to submit the form.
-                </p>
-                <hr />
-                <form asp-controller="UserRoles" asp-action="ManageUserRoles" method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <input type="hidden" asp-for="@btuser.User.Id">
-                    <div class="col-12">
+
+<h1>All Users</h1>
+<hr />
+<br />
+<table class="myTable">
+    <thead>
+        <tr>
+            <th>
+                First Name
+            </th>
+            <th>
+                Last Name
+            </th>
+            <th>
+                Current Role
+            </th>
+            <th>
+                Manage Roles
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var btuser in Model)
+        {
+
+            <tr>
+                <td>
+                    @btuser.User.FirstName
+                </td>
+                <td>
+                    @btuser.User.LastName
+                </td>
+                <td>
+                    @{
+                        var role = (await UserManager.GetRolesAsync(btuser.User)).FirstOrDefault();
+                        if (role == "ProjectManager")
+                        {
+                            role = "Project Manager";
+                        }
+                        if (role == "NewUser")
+                        {
+                            role = "Unassigned";
+                        }
+                    }
+                    <span>@role</span>
+                </td>
+                <td>
+                    <a data-target="#a-@btuser.User.Id" data-toggle="modal" class="btn btn-info">Manage Roles</a>
+                    <a data-target="#a-@btuser.User.UserName" data-toggle="modal" class="btn btn-info">Assign Projects</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
+
+
+
+@foreach (var btuser in Model)
+{
+    <div class="modal fade" id="a-@btuser.User.Id">
+        <div class="modal modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Manage Roles for @btuser.User.FullName</h4>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted font-13 m-b-30">
+                        This form displays the current roles assigned to the user: @btuser.User.FullName. Use the dropdown to select the roles that this user should be assigned. Once roles are selected, click "Assign Roles" to submit the form.
+                    </p>
+                    <hr />
+                    <form asp-controller="UserRoles" asp-action="ManageUserRoles" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="@btuser.User.Id">
                         <div class="form-group">
                             <label asp-for="@btuser.Roles" class="control-label">Roles for @btuser.User.FullName</label>
                             <select asp-for="@btuser.SelectedRoles" class="form-control" asp-items="@btuser.Roles" multiple="multiple"></select>
                         </div>
-                    </div>
-                    <hr />
-                    <div class="col-12">
-                        <div class="form-group pull-right">
-                            <input type="submit" value="Assign Roles" class="btn btn-info" />
-                            <a class="btn btn-info" asp-controller="Users" asp-action="Index">Cancel</a>
+                        <hr />
+                        <div class="form-group">
+                            <input type="submit" value="Assign Roles" class="btn btn-info float-left" />
+                            <button class="btn btn-danger float-right" data-dismiss="modal" type="button">Cancel</button>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
-    }
-</div>
+    </div>
+}
+
+
+@foreach (var btuser in Model)
+{
+    <div class="modal fade" id="a-@btuser.User.UserName">
+        <div class="modal modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Manage Assignments for @btuser.User.FullName</h4>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted font-13 m-b-30">
+                        This form displays the current projects assigned to the user: @btuser.User.FullName. Use the dropdown to select the roles that this user should be assigned. Once roles are selected, click "Assign Roles" to submit the form.
+                    </p>
+                    <hr />
+                    <form asp-action="AssignUsers" asp-controller="Projects" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="@btuser.User.Id" />
+                        <div class="form-group">
+                            <label asp-for="@btuser.Projects" class="control-label"></label>
+                            <select asp-for="@btuser.SelectedProjects" class="form-control" asp-items="@btuser.Projects" multiple="multiple"></select>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Assign Project" class="btn btn-info" />
+                            <button class="btn btn-danger float-right" data-dismiss="modal" type="button">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

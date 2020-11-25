@@ -58,13 +58,21 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name")] TicketPriority ticketPriority)
         {
-            if (ModelState.IsValid)
+            if (!User.IsInRole("Demo"))
             {
-                _context.Add(ticketPriority);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(ticketPriority);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index", "Tickets");
+                }
+                return View(ticketPriority);
             }
-            return View(ticketPriority);
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Index", "Tickets");
+            }
         }
 
         // GET: TicketPriorities/Edit/5
@@ -141,10 +149,18 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var ticketPriority = await _context.TicketPriorities.FindAsync(id);
-            _context.TicketPriorities.Remove(ticketPriority);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if (!User.IsInRole("Demo"))
+            {
+                var ticketPriority = await _context.TicketPriorities.FindAsync(id);
+                _context.TicketPriorities.Remove(ticketPriority);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index", "Tickets");
+            }
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("Index", "Tickets");
+            }
         }
 
         private bool TicketPriorityExists(int id)

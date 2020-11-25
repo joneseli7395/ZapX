@@ -49,20 +49,27 @@ namespace ZapX.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ManageUserRoles(ManageUserRolesViewModel btuser)
         {
-            BTUser user = await _context.Users.FindAsync(btuser.User.Id);
-
-            IEnumerable<string> roles = await _rolesService.ListUserRoles(user);
-            await _userManager.RemoveFromRolesAsync(user, roles);
-            string userRole = btuser.SelectedRoles.FirstOrDefault();
-
-            //Checks that the selected role is included in Enum. If so, add user to role and return updated view.
-            if (Enum.TryParse(userRole, out Roles roleValue))
+            if (!User.IsInRole("Demo"))
             {
-                await _rolesService.AddUserToRole(user, userRole);
+                BTUser user = await _context.Users.FindAsync(btuser.User.Id);
+
+                IEnumerable<string> roles = await _rolesService.ListUserRoles(user);
+                await _userManager.RemoveFromRolesAsync(user, roles);
+                string userRole = btuser.SelectedRoles.FirstOrDefault();
+
+                //Checks that the selected role is included in Enum. If so, add user to role and return updated view.
+                if (Enum.TryParse(userRole, out Roles roleValue))
+                {
+                    await _rolesService.AddUserToRole(user, userRole);
+                    return RedirectToAction("ManageUserRoles");
+                }
                 return RedirectToAction("ManageUserRoles");
             }
-
-            return RedirectToAction("ManageUserRoles");
+            else
+            {
+                TempData["DemoLockout"] = "Your changes have not been saved. To make changes to the database you will need to log in as a full user.";
+                return RedirectToAction("ManageUserRoles", "UserRoles");
+            }
         }
 
     }

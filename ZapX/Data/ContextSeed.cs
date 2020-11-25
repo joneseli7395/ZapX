@@ -14,7 +14,8 @@ namespace ZapX.Data
         ProjectManager,
         Developer,
         Submitter,
-        NewUser
+        NewUser,
+        Demo
     }
 
 
@@ -27,6 +28,7 @@ namespace ZapX.Data
             await roleManager.CreateAsync(new IdentityRole(Roles.Developer.ToString()));
             await roleManager.CreateAsync(new IdentityRole(Roles.Submitter.ToString()));
             await roleManager.CreateAsync(new IdentityRole(Roles.NewUser.ToString()));
+            await roleManager.CreateAsync(new IdentityRole(Roles.Demo.ToString()));
         }
 
         public static async Task SeedDefaultUsersAsync(UserManager<BTUser> userManager)
@@ -39,7 +41,6 @@ namespace ZapX.Data
                 Email = "joneseli7395@gmail.com",
                 FirstName = "Eli",
                 LastName = "Jones",
-                Role = "Admin",
                 EmailConfirmed = true
             };
             try
@@ -69,7 +70,6 @@ namespace ZapX.Data
                 Email = "araynor@coderfoundry.com",
                 FirstName = "Antonio",
                 LastName = "Raynor",
-                Role = "Project Manager",
                 EmailConfirmed = true
             };
             try
@@ -99,7 +99,6 @@ namespace ZapX.Data
                 Email = "timthetatman@twitch.tv",
                 FirstName = "Tim",
                 LastName = "Bo",
-                Role = "Developer",
                 EmailConfirmed = true
             };
             try
@@ -129,7 +128,6 @@ namespace ZapX.Data
                 Email = "wavy@twitch.tv",
                 FirstName = "Zach",
                 LastName = "Wavy",
-                Role = "Submitter",
                 EmailConfirmed = true
             };
             try
@@ -159,7 +157,6 @@ namespace ZapX.Data
                 Email = "xqc@twitch.tv",
                 FirstName = "Felix",
                 LastName = "Something",
-                Role = "User",
                 EmailConfirmed = true
             };
             try
@@ -180,6 +177,161 @@ namespace ZapX.Data
                 throw;
             }
             #endregion
+
+
+            //Demo Users//
+            //Can also just create new vars//
+            string demoPassword = "Abc&123?";
+            #region Demo SeedAdmin
+            //Seed Demo Admin User
+            defaultAdmin = new BTUser
+            {
+                UserName = "demoadmin@mailinator.com",
+                Email = "demoadmin@mailinator.com",
+                FirstName = "Winston",
+                LastName = "Bishop",
+                EmailConfirmed = true
+            };
+            try
+            {
+                var user = await userManager.FindByEmailAsync(defaultAdmin.Email);
+                if (user == null)
+                {
+                    await userManager.CreateAsync(defaultAdmin, demoPassword);
+                    await userManager.AddToRoleAsync(defaultAdmin, Roles.Admin.ToString());
+                    await userManager.AddToRoleAsync(defaultAdmin, Roles.Demo.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("******** ERROR ********");
+                Debug.WriteLine("Error Seeding Demo Admin User.");
+                Debug.WriteLine(ex.Message);
+                Debug.WriteLine("***********************");
+                throw;
+            }
+            #endregion
+
+            #region Demo SeedProjectManager
+            //Seed Demo ProjectManager User
+            defaultPM = new BTUser
+            {
+                UserName = "demopm@mailinator.com",
+                Email = "demopm@mailinator.com",
+                FirstName = "Alex",
+                LastName = "Smith",
+                EmailConfirmed = true
+            };
+            try
+            {
+                var user = await userManager.FindByEmailAsync(defaultPM.Email);
+                if (user == null)
+                {
+                    await userManager.CreateAsync(defaultPM, demoPassword);
+                    await userManager.AddToRoleAsync(defaultPM, Roles.ProjectManager.ToString());
+                    await userManager.AddToRoleAsync(defaultPM, Roles.Demo.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("******** ERROR ********");
+                Debug.WriteLine("Error Seeding Demo Project Manager User.");
+                Debug.WriteLine(ex.Message);
+                Debug.WriteLine("***********************");
+                throw;
+            }
+            #endregion
+
+            #region Demo SeedDev
+            //Seed Demo Developer User
+            defaultDev = new BTUser
+            {
+                UserName = "demodev@mailinator.com",
+                Email = "demodev@mailinator.com",
+                FirstName = "Tosin",
+                LastName = "Abasi",
+                EmailConfirmed = true
+            };
+            try
+            {
+                var user = await userManager.FindByEmailAsync(defaultDev.Email);
+                if (user == null)
+                {
+                    await userManager.CreateAsync(defaultDev, demoPassword);
+                    await userManager.AddToRoleAsync(defaultDev, Roles.Developer.ToString());
+                    await userManager.AddToRoleAsync(defaultDev, Roles.Demo.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("******** ERROR ********");
+                Debug.WriteLine("Error Seeding Demo Developer User.");
+                Debug.WriteLine(ex.Message);
+                Debug.WriteLine("***********************");
+                throw;
+            }
+            #endregion
+
+            #region Demo SeedSubmitter
+            //Seed Demo Submitter User
+            defaultSub = new BTUser
+            {
+                UserName = "demosub@mailinator.com",
+                Email = "demosub@mailinator.com",
+                FirstName = "Nick",
+                LastName = "Miller",
+                EmailConfirmed = true
+            };
+            try
+            {
+                var user = await userManager.FindByEmailAsync(defaultSub.Email);
+                if (user == null)
+                {
+                    await userManager.CreateAsync(defaultSub, demoPassword);
+                    await userManager.AddToRoleAsync(defaultSub, Roles.Submitter.ToString());
+                    await userManager.AddToRoleAsync(defaultSub, Roles.Demo.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("******** ERROR ********");
+                Debug.WriteLine("Error Seeding Demo Submitter User.");
+                Debug.WriteLine(ex.Message);
+                Debug.WriteLine("***********************");
+                throw;
+            }
+            #endregion
+
+            #region Demo SeedNewUser
+            //Seed Demo ProjectManager User
+            defaultNew = new BTUser
+            {
+                UserName = "demonew@mailinator.com",
+                Email = "demonew@mailinator.com",
+                FirstName = "Winston",
+                LastName = "Schmidt",
+                EmailConfirmed = true
+            };
+            try
+            {
+                var user = await userManager.FindByEmailAsync(defaultNew.Email);
+                if (user == null)
+                {
+                    await userManager.CreateAsync(defaultNew, demoPassword);
+                    await userManager.AddToRoleAsync(defaultNew, Roles.NewUser.ToString());
+                    await userManager.AddToRoleAsync(defaultNew, Roles.Demo.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("******** ERROR ********");
+                Debug.WriteLine("Error Seeding Demo New User.");
+                Debug.WriteLine(ex.Message);
+                Debug.WriteLine("***********************");
+                throw;
+            }
+            #endregion
+
         }
     }
 }

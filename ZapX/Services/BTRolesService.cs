@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ZapX.Data;
 using ZapX.Models;
 
 namespace ZapX.Services
@@ -12,11 +13,13 @@ namespace ZapX.Services
     {
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<BTUser> _userManager;
+        private readonly ApplicationDbContext _context;
 
-        public BTRolesService(RoleManager<IdentityRole> roleManager, UserManager<BTUser> userManager)
+        public BTRolesService(RoleManager<IdentityRole> roleManager, UserManager<BTUser> userManager, ApplicationDbContext context)
         {
             _roleManager = roleManager;
             _userManager = userManager;
+            _context = context;
         }
 
         public async Task<bool> AddUserToRole(BTUser user, string roleName)
@@ -55,5 +58,6 @@ namespace ZapX.Services
             var users = await _userManager.Users.ToListAsync();
             return users.Except(inRole);
         }
+
     }
 }

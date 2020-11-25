@@ -3,6 +3,15 @@
 @inject UserManager<BTUser> UserManager
 @{
     var user = await UserManager.GetUserAsync(User);
+    var role = (await UserManager.GetRolesAsync(user)).FirstOrDefault();
+    if (role == "ProjectManager")
+    {
+        role = "Project Manager";
+    }
+    if (role == "NewUser")
+    {
+        role = "Unassigned";
+    }
 }
 <!doctype html>
 <html lang="en">
@@ -21,14 +30,12 @@
     <link href="~/css/keyTable.bootstrap4.min.css" rel="stylesheet" />
     <link href="~/css/responsive.bootstrap4.min.css" rel="stylesheet" />
     <link href="~/css/select.bootstrap4.min.css" rel="stylesheet" />
-    
-</head>
 
+</head>
 <body data-sidebar="dark">
 
     <!-- Begin page -->
     <div id="layout-wrapper">
-
         <header id="page-topbar">
             <div class="navbar-header">
                 <div class="d-flex">
@@ -64,24 +71,16 @@
                             <a asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello, @user.FullName!</a>
                         </li>
                         <li>
-                            <span>Role: <b>@user.Role</b></span>
+                            <span>Role: <b>@role</b></span>
                         </li>
                         <li>
                             <a data-target="#logout" data-toggle="modal">Logout</a>
                         </li>
                     }
-                    else
-                    {
-                        @*<li>
-                            <a asp-area="Identity" asp-page="/Account/Register">Register</a>
-                        </li>
-                        <li>
-                            <a asp-area="Identity" asp-page="/Account/Login">Login</a>
-                        </li>*@
-                    }
                 </ul>
             </div>
         </header>
+
 
         <!-- ========== Left Sidebar Start ========== -->
         <div class="vertical-menu">
@@ -96,17 +95,20 @@
                         <li>
                             <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li>
-                            <a asp-area="" asp-controller="Projects" asp-action="Index">Projects</a>
-                        </li>
                         @if (User.IsInRole("Admin"))
                         {
+                            <li>
+                                <a asp-area="" asp-controller="Projects" asp-action="Index">Projects</a>
+                            </li>
                             <li>
                                 <a asp-area="" asp-controller="Tickets" asp-action="Index">All Tickets</a>
                             </li>
                         }
-                        @if (SignInManager.IsSignedIn(User))
+                        @if (!User.IsInRole("Admin"))
                         {
+                            <li>
+                                <a asp-area="" asp-controller="Projects" asp-action="MyProjects">My Projects</a>
+                            </li>
                             <li>
                                 <a asp-area="" asp-controller="Tickets" asp-action="UserTickets">My Tickets</a>
                             </li>
@@ -161,9 +163,10 @@
                     <div class="container">
                         <div class="row">
                             <div class="col">
-                                <p>Are you sure you want to logout?</p>
+                                <h4>Are you sure you want to logout?</h4>
+                                <br />
                                 <form class="form-group" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("LandingPage", "Home", new { area = "" })">
-                                    <button type="submit" class="btn btn-danger">Logout</button>
+                                    <button type="submit" class="btn btn-danger float-right">Logout</button>
                                 </form>
                             </div>
                         </div>
@@ -174,6 +177,8 @@
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/app.js"></script>
@@ -186,6 +191,14 @@
     <script src="~/js/keyTable.bootstrap4.min.js"></script>
     <script src="~/js/responsive.bootstrap4.min.js"></script>
     <script src="~/js/select.bootstrap4.min.js"></script>
+    @if (TempData["DemoLockout"] != null)
+    {
+        <script>
+            function alertFn() {
+                alert(@TempData["DemoLockout"]);
+            }
+        </script>
+    }
     @RenderSection("Scripts", required: false)
     <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
     <script>

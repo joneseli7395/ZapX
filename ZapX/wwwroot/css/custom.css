@@ -2,3 +2,21 @@
     min-height:300px;
 }
 
+/*html,body {
+    display: grid;
+    height: 100%;
+    align-items: center;
+    text-align: center;
+}*/
+
+.slider {
+    max-width: 1150px;
+    display: flex;
+}
+
+.slider .card {
+    width: 100%;
+    height: auto;
+    display:block;
+}
+
