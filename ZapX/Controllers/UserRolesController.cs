@@ -41,7 +41,6 @@ namespace ZapX.Controllers
                 vm.Roles = new MultiSelectList(_context.Roles, "Name", "Name", selected);
                 model.Add(vm);
             }
-
             return View(model);
         }
 

@@ -99,6 +99,13 @@ namespace ZapX.Controllers
         // GET: UserTickets
         public async Task<IActionResult> UserTickets()
         {
+            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName");
+            ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName");
+            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name");
+            ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name");
+            ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name");
+            ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name");
+
             var vm = new TicketProjectsViewModel();
             var userId = _userManager.GetUserId(User); // Get the currently logged in user.
             var myRole = await _rolesService.ListUserRoles(_context.Users.Find(userId));

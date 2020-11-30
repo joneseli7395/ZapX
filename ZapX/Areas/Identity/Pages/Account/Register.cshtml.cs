@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using ZapX.Data;
-using ZapX.Data.Migrations;
 using ZapX.Models;
 using ZapX.Services;
 using Roles = ZapX.Data.Roles;

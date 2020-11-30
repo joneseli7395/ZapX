@@ -50,7 +50,6 @@
                 </td>
                 <td>
                     <a data-target="#a-@btuser.User.Id" data-toggle="modal" class="btn btn-info">Manage Roles</a>
-                    <a data-target="#a-@btuser.User.UserName" data-toggle="modal" class="btn btn-info">Assign Projects</a>
                 </td>
             </tr>
         }
@@ -96,34 +95,5 @@
 }
 
 
-@foreach (var btuser in Model)
-{
-    <div class="modal fade" id="a-@btuser.User.UserName">
-        <div class="modal modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Manage Assignments for @btuser.User.FullName</h4>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted font-13 m-b-30">
-                        This form displays the current projects assigned to the user: @btuser.User.FullName. Use the dropdown to select the roles that this user should be assigned. Once roles are selected, click "Assign Roles" to submit the form.
-                    </p>
-                    <hr />
-                    <form asp-action="AssignUsers" asp-controller="Projects" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <input type="hidden" asp-for="@btuser.User.Id" />
-                        <div class="form-group">
-                            <label asp-for="@btuser.Projects" class="control-label"></label>
-                            <select asp-for="@btuser.SelectedProjects" class="form-control" asp-items="@btuser.Projects" multiple="multiple"></select>
-                        </div>
-                        <div class="form-group">
-                            <input type="submit" value="Assign Project" class="btn btn-info" />
-                            <button class="btn btn-danger float-right" data-dismiss="modal" type="button">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+
 

@@ -1,8 +1,172 @@
-﻿@{
+﻿@model ZapX.Models.ViewModels.TicketProjectsViewModel
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row">
+    <div class="col">
+        <h2 class="text-center">Tickets by:</h2>
+    </div>
 </div>
+<br />
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="text-center">Priority</h5>
+            </div>
+            <div class="card-body">
+                <div id="myfirstchart" style="height: 250px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="text-center">Status</h5>
+            </div>
+            <div class="card-body">
+                <div id="mysecondchart" style="height: 250px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="text-center">Type</h5>
+            </div>
+            <div class="card-body">
+                <div id="mythirdchart" style="height: 250px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col">
+        <h2 class="text-center">Same data, but as donuts</h2>
+    </div>
+</div>
+<br />
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="text-center">Priority</h5>
+            </div>
+            <div class="card-body">
+                <div id="sixth" style="height: 250px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="text-center">Status</h5>
+            </div>
+            <div class="card-body">
+                <div id="fifth" style="height: 250px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="text-center">Type</h5>
+            </div>
+            <div class="card-body">
+                <div id="fourth" style="height: 250px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script>
+        //Step 1 - Construct URL to request data
+        var Url1 = '@Url.Action("PriorityChart","Charts")';  //represent the endpoint
+        var Url2 = '@Url.Action("StatusChart","Charts")';  //represent the endpoint
+        var Url3 = '@Url.Action("TypeChart","Charts")';  //represent the endpoint
+        var Url4 = '@Url.Action("DonutTypeChart","Charts")';  //represent the endpoint
+        var Url5 = '@Url.Action("DonutStatusChart","Charts")';  //represent the endpoint
+        var Url6 = '@Url.Action("DonutPriorityChart","Charts")';  //represent the endpoint
+
+
+
+        //Step 2 - start structure for AJAX call
+        $.post(Url1).then(function (response) {
+            new Morris.Bar({
+                // ID of the element in which to draw the chart.
+                element: 'myfirstchart',
+                // Chart data records -- each entry in this array corresponds to a point on
+                // the chart.
+                data: response,
+                // The name of the data record attribute that contains x-values.
+                xkey: 'name',
+                // A list of names of data record attributes that contain y-values.
+                ykeys: ['count'],
+                // Labels for the ykeys -- will be displayed when you hover over the
+                // chart.
+                labels: ['Count']
+            });
+        });
+
+        $.post(Url2).then(function (response) {
+            new Morris.Bar({
+                // ID of the element in which to draw the chart.
+                element: 'mysecondchart',
+                // Chart data records -- each entry in this array corresponds to a point on
+                // the chart.
+                data: response,
+                // The name of the data record attribute that contains x-values.
+                xkey: 'name',
+                // A list of names of data record attributes that contain y-values.
+                ykeys: ['count'],
+                // Labels for the ykeys -- will be displayed when you hover over the
+                // chart.
+                labels: ['Count']
+            });
+        });
+
+        $.post(Url3).then(function (response) {
+            new Morris.Bar({
+                // ID of the element in which to draw the chart.
+                element: 'mythirdchart',
+                // Chart data records -- each entry in this array corresponds to a point on
+                // the chart.
+                data: response,
+                // The name of the data record attribute that contains x-values.
+                xkey: 'name',
+                // A list of names of data record attributes that contain y-values.
+                ykeys: ['count'],
+                // Labels for the ykeys -- will be displayed when you hover over the
+                // chart.
+                labels: ['Count']
+            });
+        });
+
+        $.post(Url4).then(function (response) {
+            new Morris.Donut({
+                element: 'fourth',
+                data: response,
+            });
+        });
+
+        $.post(Url5).then(function (response) {
+            new Morris.Donut({
+                element: 'fifth',
+                data: response,
+            });
+        });
+
+        $.post(Url6).then(function (response) {
+            new Morris.Donut({
+                element: 'sixth',
+                data: response,
+            });
+        });
+
+    </script>
+}

@@ -42,7 +42,7 @@
                                     <input asp-for="Input.Password" class="form-control" />
                                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group text-center">
                                     <div class="checkbox">
                                         <label asp-for="Input.RememberMe">
                                             <input asp-for="Input.RememberMe" />
@@ -50,10 +50,10 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group text-center">
                                     <button type="submit" class="btn btn-primary">Log in</button>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group text-center">
                                     <p>
                                         <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
                                     </p>
@@ -75,25 +75,11 @@
                             <h2 class="card-title">Admin</h2>
                             <p class="card-text">A user in the Admin role will have the ability to create and edit any and every project and ticket, as well as the ability to assign registered users to any role necessary. There are no restrictions for this user.</p>
                         </div>
-                        <div class="card-footer">
-                            <form id="account" method="post">
-                                <div class="form-group">
-                                    <button type="submit" name="demoEmail" value="DemoAdminEmail" class="btn btn-primary">Demo User</button>
-                                </div>
-                            </form>
-                        </div>
                     </div>
                     <div class="card">
                         <div class="card-body">
                             <h2 class="card-title">Project Manager</h2>
                             <p class="card-text">A user in the role of Project Manager will have the ability to create and edit any ticket found within a project that they are assigned to, as well as assign developers to tickets as they created.</p>
-                        </div>
-                        <div class="card-footer">
-                            <form id="account" method="post">
-                                <div class="form-group">
-                                    <button type="submit" name="demoEmail" value="DemoPMEmail" class="btn btn-primary">Demo User</button>
-                                </div>
-                            </form>
                         </div>
                     </div>
                     <div class="card">
@@ -101,25 +87,11 @@
                             <h2 class="card-title">Developer</h2>
                             <p class="card-text">A user in the role of Developer will have the ability to view the details of any ticket that they have been assigned to, as well as updating the status field of those tickets.</p>
                         </div>
-                        <div class="card-footer">
-                            <form id="account" method="post">
-                                <div class="form-group">
-                                    <button type="submit" name="demoEmail" value="DemoDevEmail" class="btn btn-primary">Demo User</button>
-                                </div>
-                            </form>
-                        </div>
                     </div>
                     <div class="card">
                         <div class="card-body">
                             <h2 class="card-title">Submitter</h2>
                             <p class="card-text">A user in the role of Submitter will have the ability to create a ticket for a project that they are assigned to, with their input fields being limited.</p>
-                        </div>
-                        <div class="card-footer">
-                            <form id="account" method="post">
-                                <div class="form-group">
-                                    <button type="submit" name="demoEmail" value="DemoNewUserEmail" class="btn btn-primary">Demo User</button>
-                                </div>
-                            </form>
                         </div>
                     </div>
                     <div class="card">
@@ -127,18 +99,28 @@
                             <h2 class="card-title">New User</h2>
                             <p class="card-text">A user in the role of New User should be thought of as a "new hire". They will be able to log in, but have few permissions.</p>
                         </div>
-                        <div class="card-footer">
-                            <form id="account" method="post">
-                                <div class="form-group">
-                                    <button type="submit" name="demoEmail" value="DemoNewUserEmail" class="btn btn-primary">Demo User</button>
-                                </div>
-                            </form>
-                        </div>
                     </div>
                 </div>
-                <p>
-                    <div id="customNav" class="owl-nav text-center">Select A User Role</div>
-                </p>
+                <hr />
+                <form id="account" method="post">
+                    <div class="row">
+                        <div class="col text-center">
+                            <div class="form-group">
+                                <button type="submit" name="demoEmail" value="DemoAdminEmail" class="btn btn-primary">Demo Admin</button>
+                                <button type="submit" name="demoEmail" value="DemoPMEmail" class="btn btn-primary">Demo Project Manager</button>
+                                <button type="submit" name="demoEmail" value="DemoDevEmail" class="btn btn-primary">Demo Developer</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-center">
+                            <div class="form-group">
+                                <button type="submit" name="demoEmail" value="DemoPMEmail" class="btn btn-primary">Demo User</button>
+                                <button type="submit" name="demoEmail" value="DemoSubEmail" class="btn btn-primary">Demo Submitter</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

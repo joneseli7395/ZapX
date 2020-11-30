@@ -15,6 +15,8 @@ using Microsoft.Extensions.Hosting;
 using ZapX.Models;
 using ZapX.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Npgsql;
+using ZapX.Helpers;
 
 namespace ZapX
 {
@@ -31,8 +33,8 @@ namespace ZapX
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(
+                    DataHelper.GetConnectionString(Configuration)));
 
             services.AddIdentity<BTUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -83,5 +85,6 @@ namespace ZapX
                 endpoints.MapRazorPages();
             });
         }
+
     }
 }

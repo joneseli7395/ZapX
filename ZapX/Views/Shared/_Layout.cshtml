@@ -30,6 +30,7 @@
     <link href="~/css/keyTable.bootstrap4.min.css" rel="stylesheet" />
     <link href="~/css/responsive.bootstrap4.min.css" rel="stylesheet" />
     <link href="~/css/select.bootstrap4.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
 
 </head>
 <body data-sidebar="dark">
@@ -191,6 +192,8 @@
     <script src="~/js/keyTable.bootstrap4.min.js"></script>
     <script src="~/js/responsive.bootstrap4.min.js"></script>
     <script src="~/js/select.bootstrap4.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
     @if (TempData["DemoLockout"] != null)
     {
         <script>
@@ -199,12 +202,12 @@
             }
         </script>
     }
-    @RenderSection("Scripts", required: false)
     <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function () {
             $('.myTable').DataTable({
-                searching: true
+                searching: true,
+                theme: "dark"
             });
 
             $('#anotherTable').DataTable({
@@ -213,6 +216,7 @@
 
         });
     </script>
+    @RenderSection("Scripts", required: false)
 
 </body>
 </html>
