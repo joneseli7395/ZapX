@@ -19,6 +19,7 @@
 
 </head>
 <body>
+    <br />
     <!-- Page Content -->
     <div class="container">
 
@@ -30,7 +31,7 @@
             <!-- /.col-lg-8 -->
             <div class="col-lg-5">
                 <h1 class="font-weight-light">About the Application</h1>
-                <p>This Ticket Management application uses the <b>MVC</b> software design pattern and Microsoft's <b>ASP.Net</b> framework. The backend is written in <b>C#</b>. In the cards below, you can read about each role's responsibilities, as well as interact with the application as each role to see the differences in views and functionality.<br /> Learn more about the technologies used <a href="#" data-toggle="modal" data-target="#tech">here</a>.</p>
+                <p>This Ticket Management application uses the <b>MVC</b> software design pattern and Microsoft's <b>ASP.Net</b> framework. The backend is written in <b>C#</b>. In the cards below, you can read about each of the technologies that was utilized.<br /> Learn more about the technologies used below.</p>
                 <hr />
                 <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">Register</a>
                 <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Login</a>
@@ -39,94 +40,83 @@
         </div>
         <!-- /.row -->
         <!-- Call to Action Well -->
-        <div class="card text-white bg-secondary my-5 py-4 text-center">
+        @*<div class="card text-white bg-secondary my-5 py-4 text-center">
             <div class="card-body">
                 <p class="text-white m-0">This call to action card is a great place to showcase some important information or display a clever tagline!</p>
             </div>
-        </div>
+        </div>*@
+        <br />
+        <br />
+        <br />
         <div class="row">
             <div class="col">
-                <h1 class="font-weight-light text-center">Demo Users</h1>
+                <h1 class="font-weight-light text-center">Technologies Used</h1>
                 <hr />
             </div>
         </div>
+        <br />
         <!-- Content Row -->
         <div class="row">
-            <div class="col-md-3 mb-5">
-                <div class="card h-100">
+            <div class="col-md-4 mb-6">
+                <div class="card" style="height:370px">
                     <div class="card-body">
-                        <h2 class="card-title">Admin</h2>
-                        <p class="card-text">A user in the Admin role will have the ability to create and edit any and every project and ticket, as well as the ability to assign registered users to any role necessary. There are no restrictions for this user.</p>
-                    </div>
-                    <div class="card-footer">
-                        <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                        <div class="row">
+                            <div class="col text-center">
+                                <img src="~/images/postgres.png" style="height:150px;width:250px" />
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col text-center">
+                                <p class="card-text">PostgreSQL is a free and open-source relational database management system (RDBMS) emphasizing extensibility and SQL compliance. It features transactions with Atomicity, Consistency, Isolation, Durability (ACID) properties, automatically updatable views, materialized views, triggers, foreign keys, and stored procedures.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <!-- /.col-md-4 -->
-            <div class="col-md-3 mb-5">
-                <div class="card h-100">
+            <div class="col-md-4 mb-6">
+                <div class="card" style="height:370px">
                     <div class="card-body">
-                        <h2 class="card-title">Project Manager</h2>
-                        <p class="card-text">A user in the role of Project Manager will have the ability to create and edit any ticket found within a project that they are assigned to, as well as assign developers to tickets as they created.</p>
-                    </div>
-                    <div class="card-footer">
-                        <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                        <div class="row">
+                            <div class="col text-center">
+                                <img src="~/images/mvc.jpg" style="height:150px;width:250px"/>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col text-center">
+                                <p class="card-text">MVC is a design pattern used to decouple user-interface (view), data (model), and application logic (controller). The use of the ASP.NET framework gives you a powerful, patterns-based way to build dynamic websites using the MVC pattern that enables a clean separation of concerns.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <!-- /.col-md-4 -->
-            <div class="col-md-3 mb-5">
-                <div class="card h-100">
+            <div class="col-md-4 mb-6">
+                <div class="card" style="height:370px">
                     <div class="card-body">
-                        <h2 class="card-title">Developer</h2>
-                        <p class="card-text">A user in the role of Developer will have the ability to view the details of any ticket that they have been assigned to, as well as updating the status field of those tickets.</p>
-                    </div>
-                    <div class="card-footer">
-                        <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                        <div class="row">
+                            <div class="col text-center">
+                                <img src="~/images/csharp.png" style="height:150px;width:250px"/>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col text-center">
+                                <p class="card-text">C# is a general-purpose, multi-paradigm programming language encompassing static typing, strong typing, lexically scoped, imperative, declarative, functional, generic, object-oriented (class-based), and component-oriented programming disciplines. It was developed around 2000 by Microsoft as a part of its .NET initiative.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <!-- /.col-md-4 -->
-            <div class="col-md-3 mb-5">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h2 class="card-title">Submitter</h2>
-                        <p class="card-text">A user in the role of Submitter will have the ability to create a ticket for a project that they are assigned to, with their input fields being limited.</p>
-                    </div>
-                    <div class="card-footer">
-                        <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Login</a>
-                    </div>
-                </div>
-            </div>
             <!-- /.col-md-4 -->
         </div>
         <!-- /.row -->
 
     </div>
 
-    <div class="modal" id="tech">
-        <div class="modal modal-dialog-centered modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4>Technologies Used</h4>
-                    <button type="button" class="btn" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col">
-                                <p>Some shit will go here</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger float-right" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

@@ -3,15 +3,6 @@
 @inject UserManager<BTUser> UserManager
 @{
     var user = await UserManager.GetUserAsync(User);
-    var role = (await UserManager.GetRolesAsync(user)).FirstOrDefault();
-    if (role == "ProjectManager")
-    {
-        role = "Project Manager";
-    }
-    if (role == "NewUser")
-    {
-        role = "Unassigned";
-    }
 }
 <!doctype html>
 <html lang="en">
@@ -25,13 +16,12 @@
     <link href="~/css/bootstrap-dark.min.css" rel="stylesheet" />
     <link href="~/css/app-dark.min.css" rel="stylesheet" />
     <link href="~/css/icons.min.css" rel="stylesheet" />
-    <link href="~/css/buttons.bootstrap4.min.css" rel="stylesheet" />
-    <link href="~/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
     <link href="~/css/keyTable.bootstrap4.min.css" rel="stylesheet" />
+    <link href="~/css/buttons.bootstrap4.min.css" rel="stylesheet" />
     <link href="~/css/responsive.bootstrap4.min.css" rel="stylesheet" />
     <link href="~/css/select.bootstrap4.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
-
+    <link href="~/css/custom.css" rel="stylesheet" />
 </head>
 <body data-sidebar="dark">
 
@@ -42,40 +32,55 @@
                 <div class="d-flex">
                     <div class="navbar-brand-box">
 
-                        <a href="index.html" class="logo logo-light">
+                        <a asp-action="Index" asp-controller="Home" class="logo logo-light">
                             <span class="logo-sm">
                                 <img src="~/images/logo.svg" alt="" height="22" />
                             </span>
                             <span class="logo-lg">
-                                <img src="~/images/logo-light.png" alt="" height="20" />
+                                <img src="~/images/Small-zapx-PixTeller.png" alt="" height="40" />
                             </span>
                         </a>
                     </div>
 
-                    <button type="button" class="btn btn-sm px-3 font-size-24 header-item waves-effect" id="vertical-menu-btn">
-                        <i class="mdi mdi-backburger"></i>
-                    </button>
+                    @*<button type="button" class="btn btn-sm px-3 font-size-24 header-item waves-effect" id="vertical-menu-btn">
+                            <i class="mdi mdi-backburger"></i>
+                        </button>*@
 
                 </div>
 
-                <div class="d-flex">
 
-                    <div class="d-inline-block">
-                        <h5><span class="badge badge-danger float-right">v1.4.1</span></h5>
-                    </div>
-
-                </div>
-                <ul>
+                <ul class="navbar-nav mr-5">
                     @if (SignInManager.IsSignedIn(User))
                     {
-                        <li>
-                            <a asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello, @user.FullName!</a>
-                        </li>
-                        <li>
-                            <span>Role: <b>@role</b></span>
-                        </li>
-                        <li>
-                            <a data-target="#logout" data-toggle="modal">Logout</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" data-toggle="dropdown" href="#" aria-expanded="true" title="Manage"><img src="~/images/deffault.png" style="height:30px;width:30px;border-radius:50px 50px 50px 50px" />&nbsp;&nbsp;&nbsp;Hello, @user.FullName!
+                            </a>
+                            <div class="dropdown-menu text-center" aria-labelledby="navbarDropdownMenuLink">
+                                <a asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage" class="text-muted">Profile</a>
+                                <hr />
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <span>Role: <b>Admin</b></span>
+                                }
+                                @if (User.IsInRole("ProjectManager"))
+                                {
+                                    <span>Role: <b>Project Manager</b></span>
+                                }
+                                @if (User.IsInRole("Developer"))
+                                {
+                                    <span>Role: <b>Developer</b></span>
+                                }
+                                @if (User.IsInRole("Submitter"))
+                                {
+                                    <span>Role: <b>Submitter</b></span>
+                                }
+                                @if (User.IsInRole("NewUser"))
+                                {
+                                    <span>Role: <b>Unassigned</b></span>
+                                }
+                                <hr />
+                                <a data-target="#logout" data-toggle="modal">Logout</a>
+                            </div>
                         </li>
                     }
                 </ul>
@@ -92,32 +97,33 @@
                 <div id="sidebar-menu">
                     <!-- Left Menu Start -->
                     @*<partial name="_LoginPartial" />*@
-                    <ul class="metismenu list-unstyled" id="side-menu">
-                        <li>
-                            <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
+                    <ul id="side-menu">
+
                         @if (User.IsInRole("Admin"))
                         {
+                            <li class="list-unstyled">
+                                <h5><b>Manage</b></h5>
+                            </li>
                             <li>
                                 <a asp-area="" asp-controller="Projects" asp-action="Index">Projects</a>
                             </li>
                             <li>
-                                <a asp-area="" asp-controller="Tickets" asp-action="Index">All Tickets</a>
+                                <a asp-area="" asp-controller="Tickets" asp-action="Index">Tickets</a>
+                            </li>
+                            <li>
+                                <a asp-area="" asp-controller="UserRoles" asp-action="ManageUserRoles">User Roles</a>
                             </li>
                         }
                         @if (!User.IsInRole("Admin"))
                         {
-                            <li>
-                                <a asp-area="" asp-controller="Projects" asp-action="MyProjects">My Projects</a>
+                            <li class="list-unstyled">
+                                <h5><b>User</b></h5>
                             </li>
                             <li>
-                                <a asp-area="" asp-controller="Tickets" asp-action="UserTickets">My Tickets</a>
+                                <a asp-area="" asp-controller="Projects" asp-action="MyProjects">Projects</a>
                             </li>
-                        }
-                        @if (User.IsInRole("Admin"))
-                        {
                             <li>
-                                <a asp-area="" asp-controller="UserRoles" asp-action="ManageUserRoles">Manage Roles</a>
+                                <a asp-area="" asp-controller="Tickets" asp-action="UserTickets">Tickets</a>
                             </li>
                         }
                     </ul>
@@ -141,11 +147,16 @@
             </div>
 
 
-            <footer class="footer">
+            <footer class="footer pb-4">
                 <div class="container">
                     <div class="row">
                         <div class="col text-center">
                             &copy; 2020 - ZapX - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-center">
+                            Made by <a href="ejdevspot.com" target="_blank">Eli Jones</a>
                         </div>
                     </div>
                 </div>
@@ -188,7 +199,6 @@
     <script src="~/js/waves.min.js"></script>
     <script src="~/js/autoFill.bootstrap4.min.js"></script>
     <script src="~/js/buttons.bootstrap4.min.js"></script>
-    <script src="~/js/dataTables.bootstrap4.min.js"></script>
     <script src="~/js/keyTable.bootstrap4.min.js"></script>
     <script src="~/js/responsive.bootstrap4.min.js"></script>
     <script src="~/js/select.bootstrap4.min.js"></script>
@@ -207,7 +217,6 @@
         $(document).ready(function () {
             $('.myTable').DataTable({
                 searching: true,
-                theme: "dark"
             });
 
             $('#anotherTable').DataTable({

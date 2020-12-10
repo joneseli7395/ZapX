@@ -7,17 +7,21 @@
     ViewData["Title"] = "Details";
 }
 
-<h1><img src="@Model.Project.ImagePath" class="img-thumbnail" style="height:100px;width:100px" /> @Model.Project.Name Details</h1>
+<h1 class="text-center">Details for @Model.Project.Name <img src="@Model.Project.ImagePath" class="float-right" style="height:100px;width:150px" /></h1>
 <br />
-@if (Model.Project.Tickets.Count() == 1)
-{
-    <h4>There is @Model.Project.Tickets.Count() open ticket</h4>
-}
-else
-{
-    <h4>There are @Model.Project.Tickets.Count() open tickets</h4>
-}
 
+<div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        @*<a class="btn btn-success" asp-controller="Tickets" asp-action="Create" asp-route-id="@Model.Project.Id">Create Ticket</a>*@
+        <a class="btn btn-success text-dark" data-target="#create" data-toggle="modal">Create Ticket</a>
+    }
+    @if (User.IsInRole("Admin") || User.IsInRole("ProjectManager"))
+    {
+        <a class="btn btn-info text-dark" asp-action="AssignUsers" asp-route-id="@Model.Project.Id">Add Users</a>
+        <a class="btn btn-info text-dark" data-target="#edit" data-toggle="modal">Edit Project</a>
+    }
+</div>
 
 <br />
 <hr />
@@ -46,105 +50,101 @@ else
         </div>
     </div>
     <div class="col">
-        <table class="myTable">
-            <thead>
-                <tr>
-                    <th>
-                        Title
-                    </th>
-                    @*<th>
-                            Description
-                        </th>*@
-                    <th>
-                        Created
-                    </th>
-                    @*<th>
-                            Updated
-                        </th>*@
-                    @*<th>
-                            Project
-                        </th>*@
-                    <th>
-                        Type
-                    </th>
-                    <th>
-                        Priority
-                    </th>
-                    <th>
-                        Status
-                    </th>
-                    <th>
-                        Owner
-                    </th>
-                    <th>
-                        Developer
-                    </th>
-                    <th>
-                        Details
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.Project.Tickets)
-                {
-                    <tr>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Title)
-                        </td>
-                        @*<td>
-                                @Html.DisplayFor(modelItem => item.Description)
-                            </td>*@
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Created)
-                        </td>
-                        @*<td>
-                                @Html.DisplayFor(modelItem => item.Updated)
-                            </td>*@
-                        @*<td>
-                                @Html.DisplayFor(modelItem => item.Project.Name)
-                            </td>*@
-                        <td>
-                            @Html.DisplayFor(modelItem => item.TicketType.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.TicketPriority.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.TicketStatus.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
-                        </td>
-                        <td>
-                            @if (User.IsInRole("Admin") || User.IsInRole("Project Manager") || User.IsInRole("Developer") || User.IsInRole("Submitter"))
-                            {
-                                <a class="btn btn-info" asp-action="Details" asp-controller="Tickets" asp-route-id="@item.Id">Details</a>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="card border-dark">
+            <div class="card-header border-dark">
+                <h3 class="text-left">Project Ticket Count:  @Model.Project.Tickets.Count()</h3>
+            </div>
+            <div class="card-body users">
+                <table class="myTable">
+                    <thead>
+                        <tr>
+                            <th>
+                                Title
+                            </th>
+                            @*<th>
+                                    Description
+                                </th>*@
+                            <th>
+                                Created
+                            </th>
+                            @*<th>
+                                    Updated
+                                </th>*@
+                            @*<th>
+                                    Project
+                                </th>*@
+                            <th>
+                                Type
+                            </th>
+                            <th>
+                                Priority
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                            <th>
+                                Owner
+                            </th>
+                            <th>
+                                Developer
+                            </th>
+                            <th>
+                                Details
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Project.Tickets)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Title)
+                                </td>
+                                @*<td>
+                                        @Html.DisplayFor(modelItem => item.Description)
+                                    </td>*@
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Created)
+                                </td>
+                                @*<td>
+                                        @Html.DisplayFor(modelItem => item.Updated)
+                                    </td>*@
+                                @*<td>
+                                        @Html.DisplayFor(modelItem => item.Project.Name)
+                                    </td>*@
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.TicketType.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.TicketPriority.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.TicketStatus.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
+                                </td>
+                                <td>
+                                    @if (User.IsInRole("Admin") || User.IsInRole("ProjectManager") || User.IsInRole("Developer") || User.IsInRole("Submitter"))
+                                    {
+                                        <a class="btn btn-info" asp-action="Details" asp-controller="Tickets" asp-route-id="@item.Id">Details</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 <br />
 <br />
-<hr />
-<div>
-    @if (User.Identity.IsAuthenticated)
-    {
-        @*<a class="btn btn-success" asp-controller="Tickets" asp-action="Create" asp-route-id="@Model.Project.Id">Create Ticket</a>*@
-        <a class="btn btn-success text-light" data-target="#create" data-toggle="modal">Create Ticket</a>
-    }
-    @if (User.IsInRole("Admin") || User.IsInRole("Project Manager"))
-    {
-        <a class="btn btn-info" asp-action="AssignUsers" asp-route-id="@Model.Project.Id">Add Users</a>
-        <a class="btn btn-info" asp-action="Edit" asp-route-id="@Model.Project.Id">Edit</a>
-    }
-    <a class="btn btn-info" asp-action="Index">Back to Projects</a>
+<div class="text-center">
+    <a class="btn btn-info" asp-action="Index">Back to Projects List</a>
 </div>
 
 <div class="modal" id="create">
@@ -221,3 +221,56 @@ else
         </div>
     </div>
 </div>
+
+<div class="modal" id="edit">
+    <div class="modal modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <h4 class="modal-title">Edit Ticket</h4>
+                <button type="button" class="btn" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <form asp-action="Edit" asp-controller="Projects" asp-route-id="@Model.Project.Id" enctype="multipart/form-data">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <input type="hidden" asp-for="Project.Id" />
+                                <input asp-for="Project.ImagePath" type="hidden" />
+                                <div class="form-group">
+                                    <label asp-for="Project.Name" class="control-label"></label>
+                                    <input asp-for="Project.Name" class="form-control" />
+                                    <span asp-validation-for="Project.Name" class="text-danger"></span>
+                                </div>
+                                @*<div class="form-group">
+                                        <label asp-for="ImagePath" class="control-label"></label>
+                                        <input asp-for="ImagePath" class="form-control" />
+                                        <span asp-validation-for="ImagePath" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label asp-for="ImageData" class="control-label"></label>
+                                        <input asp-for="ImageData" class="form-control" />
+                                        <span asp-validation-for="ImageData" class="text-danger"></span>
+                                    </div>*@
+                                <div class="form-group">
+                                    <label for="FileName" class="control-label"></label>
+                                    <input name="image" type="file" class="form-control" />
+                                </div>
+                                <hr />
+                                <div class="form-group">
+                                    <input type="submit" value="Save" class="btn btn-info" />
+                                </div>
+                            </form>
+                            <form class="form-group" asp-action="Delete" asp-route-id="@Model.Project.Id">
+                                <input type="hidden" asp-for="Project.Id" />
+                                <input type="submit" value="Delete" class="btn btn-danger float-right" />
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

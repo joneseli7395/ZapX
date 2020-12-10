@@ -95,8 +95,8 @@ namespace ZapX.Data
             //Seed Default Developer User
             var defaultDev = new BTUser
             {
-                UserName = "timthetatman@twitch.tv",
-                Email = "timthetatman@twitch.tv",
+                UserName = "timthetatman@mailinator.com",
+                Email = "timthetatman@mailinator.com",
                 FirstName = "Tim",
                 LastName = "Bo",
                 EmailConfirmed = true
@@ -124,8 +124,8 @@ namespace ZapX.Data
             //Seed Default Submitter User
             var defaultSub = new BTUser
             {
-                UserName = "wavy@twitch.tv",
-                Email = "wavy@twitch.tv",
+                UserName = "wavy@mailinator.com",
+                Email = "wavy@mailinator.com",
                 FirstName = "Zach",
                 LastName = "Wavy",
                 EmailConfirmed = true

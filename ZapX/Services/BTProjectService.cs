@@ -31,15 +31,15 @@ namespace ZapX.Services
             //bool result = project.ProjectUsers.Any(u => u.UserId == userId);
             //return result;
 
-            var user = await _context.ProjectUsers.FirstOrDefaultAsync(pu => pu.UserId == userId && pu.ProjectId == projectId);
-            if (user == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return await _context.ProjectUsers.AnyAsync(pu => pu.UserId == userId && pu.ProjectId == projectId);
+            //if (user == null)
+            //{
+            //    return false;
+            //}
+            //else
+            //{
+            //    return true;
+            //}
 
             //Mackenzie's code
             //return _context.ProjectUsers.Where(pu => pu.UserId == userId && pu.ProjectId == projectId).Any();
@@ -50,7 +50,7 @@ namespace ZapX.Services
             BTUser user = await _context.Users
                 .Include(p => p.ProjectUsers).ThenInclude(p => p.Project)
                 .FirstOrDefaultAsync(p => p.Id == userId);
-            List<Project> projects = user.ProjectUsers.SelectMany(p => (IEnumerable<Project>)p.Project).ToList();
+            List<Project> projects = user.ProjectUsers.Select(p => p.Project).ToList();
             return projects;
         }
 

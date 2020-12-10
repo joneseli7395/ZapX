@@ -6,9 +6,9 @@
 
 
 @{ ViewData["Title"] = "MyTickets";
-                var userId = UserManager.GetUserId(User);
-                var user = await UserManager.GetUserAsync(User);
-                var roleName = (await UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).FirstOrDefault(); }
+    var userId = UserManager.GetUserId(User);
+    var user = await UserManager.GetUserAsync(User);
+    var roleName = (await UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).FirstOrDefault(); }
 
 
 <h1>@user.FullName's Tickets</h1>
@@ -17,92 +17,96 @@
     <a class="btn btn-success text-light" data-toggle="modal" data-target="#create">Create a Ticket</a>
 </p>
 
-<table class="myTable table-dark hover">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.Title)
-            </th>
-            @*<th>
-                    @Html.DisplayNameFor(model => model.Description)
-                </th>*@
-            @*<th>
-                    @Html.DisplayNameFor(model => model.Created)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Updated)
-                </th>*@
-            <th>
-                @Html.DisplayNameFor(model => model.Project)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.TicketType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.TicketPriority)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.TicketStatus)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.OwnerUser)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.DeveloperUser)
-            </th>
+<div class="card">
+    <div class="card-body" style="background-color:#222736">
+        <table class="myTable table-dark hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.Title)
+                    </th>
+                    @*<th>
+                            @Html.DisplayNameFor(model => model.Description)
+                        </th>*@
+                    @*<th>
+                            @Html.DisplayNameFor(model => model.Created)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Updated)
+                        </th>*@
+                    <th>
+                        @Html.DisplayNameFor(model => model.Project)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.TicketType)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.TicketPriority)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.TicketStatus)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.OwnerUser)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.DeveloperUser)
+                    </th>
 
-            <th>
-                Details
-            </th>
+                    <th>
+                        Details
+                    </th>
 
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Tickets)
-        {
-<tr>
-    <td>
-        @Html.DisplayFor(modelItem => item.Title)
-    </td>
-    @*<td>
-            @Html.DisplayFor(modelItem => item.Description)
-        </td>*@
-    @*<td>
-            @Html.DisplayFor(modelItem => item.Created)
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Tickets)
+                {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Title)
+        </td>
+        @*<td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>*@
+        @*<td>
+                @Html.DisplayFor(modelItem => item.Created)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Updated)
+            </td>*@
+        <td>
+            @Html.DisplayFor(modelItem => item.Project.Name)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.Updated)
-        </td>*@
-    <td>
-        @Html.DisplayFor(modelItem => item.Project.Name)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.TicketType.Id)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.TicketPriority.Id)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.TicketStatus.Id)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
-    </td>
-    <td>
-        @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
-    </td>
+            @Html.DisplayFor(modelItem => item.TicketType.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.TicketPriority.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.TicketStatus.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
+        </td>
 
-    <td>
-        @if (await AccessService.CanInteractTicket(userId, item.Id, roleName))
-        {
+        <td>
+            @if (await AccessService.CanInteractTicket(userId, item.Id, roleName))
+            {
 <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>}
-    </td>
+        </td>
 
 
-</tr>
+    </tr>
 }
-    </tbody>
-</table>
+            </tbody>
+        </table>
+    </div>
+</div>
 
 
 <div class="modal" id="create">

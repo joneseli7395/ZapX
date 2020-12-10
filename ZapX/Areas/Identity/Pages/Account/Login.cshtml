@@ -101,6 +101,16 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col"></div>
+                    <div class="col">
+                        <div class="slider-nav">
+                            <img src="~/images/Previous-PixTeller.png" class="am-prev" style="width:35px;height:35px" />
+                            <img src="~/images/Next-PixTeller.png" class="am-next" style="width:35px;height:35px" />
+                        </div>
+                    </div>
+                    <div class="col"></div>
+                </div>
                 <hr />
                 <form id="account" method="post">
                     <div class="row">
@@ -141,10 +151,8 @@
             margin: 10,
             autoplayTimeout: 5000,
             autoplayHoverPause: true,
-            navContainer: '#customNav',
-            dots: true,
-            dotsEach: true,
-            dotsContainer: '#customDots'
+            nav: true,
+            navText: [$(".am-prev"), $(".am-next")]
         });
     </script>
     @section Scripts {

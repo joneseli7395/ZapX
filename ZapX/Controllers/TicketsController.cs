@@ -73,41 +73,23 @@ namespace ZapX.Controllers
             return View(vm);
         }
 
-        // GET: MyTickets
-        public async Task<IActionResult> MyTickets()
-        {
-            if (User.IsInRole("Admin"))
-            {
-                return View("Index");
-            }
-            if (User.IsInRole("ProjectManager"))
-            {
-                return View("Index", _ticketService.ListProjectManagerTickets(_userManager.GetUserId(User)));
-            }
-            if (User.IsInRole("Developer"))
-            {
-                return View("Index", _ticketService.ListDeveloperTickets(_userManager.GetUserId(User)));
-            }
-            if (User.IsInRole("Submitter"))
-            {
-                return View("Index", _ticketService.ListSubmitterTickets(_userManager.GetUserId(User)));
-            }
-
-            return NotFound();
-        }
 
         // GET: UserTickets
         public async Task<IActionResult> UserTickets()
         {
+            var userId = _userManager.GetUserId(User); // Get the currently logged in user.
+
             ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "FullName");
+            var projects = _context.Projects;
+            var devProjects = await _projectService.ListUserProjects(userId);
             ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName");
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name");
+            ViewData["ProjectId"] = new SelectList(projects, "Id", "Name");
             ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name");
             ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name");
             ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name");
 
             var vm = new TicketProjectsViewModel();
-            var userId = _userManager.GetUserId(User); // Get the currently logged in user.
+            //var userId = _userManager.GetUserId(User); // Get the currently logged in user.
             var myRole = await _rolesService.ListUserRoles(_context.Users.Find(userId));
             var test = myRole.FirstOrDefault();
             List<Ticket> model;
@@ -124,7 +106,7 @@ namespace ZapX.Controllers
                         .ToList();
                     break;
                 // Snippet to get ticket for project manager - special case for roles
-                case "Project Manager":
+                case "ProjectManager":
                     var projectIds = new List<int>();
                     model = new List<Ticket>();
                     var userProjects = _context.ProjectUsers.Where(pu => pu.UserId == userId).ToList();
@@ -153,6 +135,8 @@ namespace ZapX.Controllers
                         .Include(t => t.TicketType)
                         .Include(t => t.Project)
                         .ToList();
+                    ViewData["ProjectId"] = new SelectList(devProjects, "Id", "Name");
+
                     break;
                 case "Submitter":
                     model = _context.Tickets.Where(t => t.OwnerUserId == userId)
@@ -162,6 +146,7 @@ namespace ZapX.Controllers
                         .Include(t => t.TicketType)
                         .Include(t => t.Project)
                         .ToList();
+                    ViewData["ProjectId"] = new SelectList(devProjects, "Id", "Name");
                     break;
                 default:
                     return RedirectToAction("Index", "Home");
@@ -193,6 +178,23 @@ namespace ZapX.Controllers
                     .Include(t => t.Attachments)
                     .Include(t => t.Histories)
                     .FirstOrDefaultAsync(m => m.Id == id);
+
+                var availableUsers = new List<BTUser>();
+                if (User.IsInRole("ProjectManager"))
+                {
+                    availableUsers = (List<BTUser>)await _projectService.DevelopersOnProjectAsync(ticket.ProjectId);
+                }
+                else
+                {
+                    availableUsers = (List<BTUser>)await _projectService.UsersOnProject(ticket.ProjectId);
+                }
+                ViewData["DeveloperUserId"] = new SelectList(availableUsers, "Id", "FullName", ticket.DeveloperUserId);
+                ViewData["OwnerUserId"] = new SelectList(_context.Users, "Id", "FullName", ticket.OwnerUserId);
+                ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Name", ticket.ProjectId);
+                ViewData["TicketPriorityId"] = new SelectList(_context.TicketPriorities, "Id", "Name", ticket.TicketPriorityId);
+                ViewData["TicketStatusId"] = new SelectList(_context.TicketStatuses, "Id", "Name", ticket.TicketStatusId);
+                ViewData["TicketTypeId"] = new SelectList(_context.TicketTypes, "Id", "Name", ticket.TicketTypeId);
+
 
 
                 if (ticket == null)
@@ -303,7 +305,7 @@ namespace ZapX.Controllers
                     return NotFound();
                 }
                 var availableUsers = new List<BTUser>();
-                if(User.IsInRole("ProjectManager"))
+                if (User.IsInRole("ProjectManager"))
                 {
                     availableUsers = (List<BTUser>)await _projectService.DevelopersOnProjectAsync(ticket.ProjectId);
                 }

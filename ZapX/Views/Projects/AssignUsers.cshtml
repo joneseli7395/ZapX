@@ -1,4 +1,6 @@
-﻿@model ZapX.Models.ViewModels.ManageProjectUsersViewModel
+﻿@using Microsoft.AspNetCore.Identity
+@model ZapX.Models.ViewModels.ManageProjectUsersViewModel
+@inject UserManager<BTUser> UserManager
 
 @{
     ViewData["Title"] = "Add User";
@@ -14,7 +16,7 @@
             <form asp-action="AssignUsers" asp-controller="Projects" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="@Model.Project.Id" />
-                <input type="hidden" asp-for="@Model.Project.Name"/>
+                <input type="hidden" asp-for="@Model.Project.Name" />
                 <div class="col-12">
                     <div class="form-group">
                         <label asp-for="@Model.Users" class="control-label">Roles for @Model.Project.Name</label>
@@ -39,7 +41,17 @@
             <div class="card-body users">
                 @foreach (var user in Model.UsersOnProject)
                 {
-                    <p>@user.FullName</p>
+                    var role = (await UserManager.GetRolesAsync(user)).FirstOrDefault();
+                    if (role == "ProjectManager")
+                    {
+                        role = "Project Manager";
+                    }
+                    if (role == "NewUser")
+                    {
+                        role = "Unassigned";
+                    }
+
+                    <p>@user.FullName: <b>@role</b></p> <br />
                 }
             </div>
         </div>
@@ -52,7 +64,17 @@
             <div class="card-body users">
                 @foreach (var user in Model.UsersNotOnProject)
                 {
-                    <p>@user.FullName</p>
+                    var role = (await UserManager.GetRolesAsync(user)).FirstOrDefault();
+                    if (role == "ProjectManager")
+                    {
+                        role = "Project Manager";
+                    }
+                    if (role == "NewUser")
+                    {
+                        role = "Unassigned";
+                    }
+
+                    <p>@user.FullName: <b>@role</b></p> <br />
                 }
             </div>
         </div>

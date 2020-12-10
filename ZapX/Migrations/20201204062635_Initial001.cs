@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ZapX.Migrations
 {
-    public partial class Initial_001 : Migration
+    public partial class Initial001 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

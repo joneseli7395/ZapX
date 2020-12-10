@@ -8,109 +8,106 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>All Tickets</h1>
-
-@if (Model.Tickets.Count() == 1)
-{
-    <h4>There is @Model.Tickets.Count() total open ticket</h4>
-}
-else
-{
-    <h4>There are @Model.Tickets.Count() total open tickets</h4>
-}
+<h1 class="text-center">All Tickets</h1>
 
 @if (User.Identity.IsAuthenticated)
 {
-    <a class="btn btn-success text-light" data-toggle="modal" data-target="#create">Create a Ticket</a>
+    <a class="btn btn-success text-dark" data-toggle="modal" data-target="#create">Create a Ticket</a>
 }
 @if (User.IsInRole("Admin"))
 {
-    <a class="btn btn-info text-light" data-toggle="modal" data-target="#priority">Ticket Priorities</a>
-    <a class="btn btn-info text-light" data-toggle="modal" data-target="#statuses">Ticket Statuses</a>
-    <a class="btn btn-info text-light" data-toggle="modal" data-target="#type">Ticket Types</a>
+    <a class="btn btn-info text-dark" data-toggle="modal" data-target="#priority">Ticket Priorities</a>
+    <a class="btn btn-info text-dark" data-toggle="modal" data-target="#statuses">Ticket Statuses</a>
+    <a class="btn btn-info text-dark" data-toggle="modal" data-target="#type">Ticket Types</a>
 }
 <hr />
 <br />
-<table class="myTable">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.Created)
-            </th>
-            @*<th>
-                    @Html.DisplayNameFor(model => model.Updated)
-                </th>*@
-            <th>
-                @Html.DisplayNameFor(model => model.Project)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.TicketType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.TicketPriority)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.TicketStatus)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.DeveloperUser)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ticket.OwnerUser)
-            </th>
-            <th>
-                Details
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Tickets)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Title)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Created)
-                </td>
-                @*<td>
-                        @Html.DisplayFor(modelItem => item.Updated)
-                    </td>*@
-                <td>
-                    @Html.DisplayFor(modelItem => item.Project.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TicketType.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TicketPriority.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.TicketStatus.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
-                </td>
-                <td>
-                    <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
+<div class="card">
+    <div class="card-header">
+        <h3 class="text-right">Ticket Count: @Model.Tickets.Count() </h3>
+    </div>
+    <div class="card-body">
+        <table class="myTable table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.Title)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.Description)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.Created)
+                    </th>
+                    @*<th>
+                            @Html.DisplayNameFor(model => model.Updated)
+                        </th>*@
+                    <th>
+                        @Html.DisplayNameFor(model => model.Project)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.TicketType)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.TicketPriority)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.TicketStatus)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.DeveloperUser)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Ticket.OwnerUser)
+                    </th>
+                    <th>
+                        Details
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Tickets)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Title)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Created)
+                        </td>
+                        @*<td>
+                                @Html.DisplayFor(modelItem => item.Updated)
+                            </td>*@
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Project.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TicketType.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TicketPriority.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TicketStatus.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
+                        </td>
+                        <td>
+                            <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
 @*LOOK AT ALL THESE MODALS*@
 
@@ -203,7 +200,7 @@ else
                                 <tr>
                                     <th></th>
                                     <th>
-                                        Name
+                                        Priority
                                     </th>
                                     <th></th>
                                 </tr>
@@ -265,7 +262,7 @@ else
                                 <tr>
                                     <th></th>
                                     <th>
-                                        Name
+                                        Status
                                     </th>
                                     <th></th>
                                 </tr>
@@ -327,7 +324,7 @@ else
                                 <tr>
                                     <th></th>
                                     <th>
-                                        Name
+                                        Type
                                     </th>
                                     <th></th>
                                 </tr>

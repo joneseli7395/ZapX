@@ -1,59 +1,111 @@
-﻿@model ZapX.Models.ViewModels.TicketProjectsViewModel
+﻿@using Microsoft.AspNetCore.Identity
+@using ZapX.Services
+@model ZapX.Models.ViewModels.TicketProjectsViewModel
+@inject UserManager<BTUser> UserManager
+@inject IBTAccessService AccessService
+
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
+    var user = await UserManager.GetUserAsync(User);
+    var userId = UserManager.GetUserId(User);
+    var roleName = (await UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).FirstOrDefault();
+}
+
+@if (User.IsInRole("Demo"))
+{
+    <div class="col">
+        <div class="alert alert-dismissible fade show text-center" role="alert">
+            <div class="card">
+                <div class="card-header bg-danger">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Closer">
+                        <span aria-hidden="true">x</span>
+                    </button>
+                </div>
+                <div class="card-body bg-danger">
+                    <h5><b>Heads up!</b> You are logged in as a Demo user. Your changes will not be saved to the database.</h5>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 <div class="row">
-    <div class="col">
-        <h2 class="text-center">Tickets by:</h2>
+    <div class="col"></div>
+    <div class="col-5">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="text-center">Welcome to your dashboard, @user.FullName!</h2>
+                @if (!User.IsInRole("NewUser"))
+                {
+                    var role = (await UserManager.GetRolesAsync(user)).FirstOrDefault();
+                    if (role == "ProjectManager")
+                    {
+                        role = "Project Manager";
+                    }
+                    if (role == "NewUser")
+                    {
+                        role = "Unassigned";
+                    }
+                    <h5 class="text-center">You have been assigned to the role of @role</h5>
+
+                }
+                else
+                {
+                    <h5 class="text-center">You have not been assigned to a role</h5>
+                }
+            </div>
+        </div>
     </div>
+    <div class="col"></div>
 </div>
-<br />
-<div class="row">
-    <div class="col">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="text-center">Priority</h5>
-            </div>
-            <div class="card-body">
-                <div id="myfirstchart" style="height: 250px;"></div>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="text-center">Status</h5>
-            </div>
-            <div class="card-body">
-                <div id="mysecondchart" style="height: 250px;"></div>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="text-center">Type</h5>
-            </div>
-            <div class="card-body">
-                <div id="mythirdchart" style="height: 250px;"></div>
-            </div>
-        </div>
-    </div>
-</div>
+
 <hr />
-<div class="row">
-    <div class="col">
-        <h2 class="text-center">Same data, but as donuts</h2>
+
+@*<div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="text-center">Priority</h5>
+                </div>
+                <div class="card-body">
+                    <div id="myfirstchart" style="height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="text-center">Status</h5>
+                </div>
+                <div class="card-body">
+                    <div id="mysecondchart" style="height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="text-center">Type</h5>
+                </div>
+                <div class="card-body">
+                    <div id="mythirdchart" style="height: 250px;"></div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+    <hr />
+    <div class="row">
+        <div class="col">
+            <h2 class="text-center">Same data, but as donuts</h2>
+        </div>
+    </div>*@
 <br />
 <div class="row">
     <div class="col">
         <div class="card">
             <div class="card-header">
-                <h5 class="text-center">Priority</h5>
+                <h5 class="text-center">Tickets By Priority</h5>
             </div>
             <div class="card-body">
                 <div id="sixth" style="height: 250px;"></div>
@@ -63,7 +115,7 @@
     <div class="col">
         <div class="card">
             <div class="card-header">
-                <h5 class="text-center">Status</h5>
+                <h5 class="text-center">Tickets By Status</h5>
             </div>
             <div class="card-body">
                 <div id="fifth" style="height: 250px;"></div>
@@ -73,10 +125,108 @@
     <div class="col">
         <div class="card">
             <div class="card-header">
-                <h5 class="text-center">Type</h5>
+                <h5 class="text-center">Tickets By Type</h5>
             </div>
             <div class="card-body">
                 <div id="fourth" style="height: 250px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-header text-center">
+                <h3>Recent Tickets for You</h3>
+            </div>
+            <div class="card-body">
+                <table class="myTable table-dark hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Ticket.Title)
+                            </th>
+                            @*<th>
+                                    @Html.DisplayNameFor(model => model.Description)
+                                </th>*@
+                            @*<th>
+                                    @Html.DisplayNameFor(model => model.Created)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Updated)
+                                </th>*@
+                            <th>
+                                @Html.DisplayNameFor(model => model.Project)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Ticket.TicketType)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Ticket.TicketPriority)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Ticket.TicketStatus)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Ticket.OwnerUser)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Ticket.DeveloperUser)
+                            </th>
+
+                            <th>
+                                Details
+                            </th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Tickets)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Title)
+                                </td>
+                                @*<td>
+                                        @Html.DisplayFor(modelItem => item.Description)
+                                    </td>*@
+                                @*<td>
+                                        @Html.DisplayFor(modelItem => item.Created)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Updated)
+                                    </td>*@
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Project.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.TicketType.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.TicketPriority.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.TicketStatus.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.OwnerUser.FullName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.DeveloperUser.FullName)
+                                </td>
+
+                                <td>
+                                    @if (await AccessService.CanInteractTicket(userId, item.Id, roleName))
+                                    {
+                                        <a class="btn btn-info" asp-action="Details" asp-controller="Tickets" asp-route-id="@item.Id">Details</a>}
+                                </td>
+
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

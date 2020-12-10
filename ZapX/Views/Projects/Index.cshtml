@@ -10,67 +10,83 @@
     var roleName = (await UserManager.GetRolesAsync(await UserManager.GetUserAsync(User))).FirstOrDefault();
 }
 
-<h1>Projects List</h1>
-<h4>@Model.Projects.Count() total projects</h4>
+<h1 class="text-center">Projects List</h1>
 @if (User.IsInRole("Admin") || User.IsInRole("ProjectManager"))
 {
     <p>
-        <a class="btn btn-success text-light" data-toggle="modal" data-target="#create">Create a Project</a>
+        <a class="btn btn-success text-dark" data-toggle="modal" data-target="#create">Create a Project</a>
     </p>
 }
-<table class="myTable">
-    <thead>
-        <tr>
-            <th>
-                Image
-            </th>
-            <th>
-                Name
-            </th>
-            <th>
-                Currently Assigned
-            </th>
-            @*<th>
-                    @Html.DisplayNameFor(model => model.ImagePath)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.ImageData)
-                </th>*@
-            <th>
-                Details
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Projects)
-        {
-            <tr>
-                <td><img src="@item.ImagePath" class="img-thumbnail" style="height:100px;width:100px" /></td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                @*<td>
-                        @Html.DisplayFor(modelItem => item.ImagePath)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.ImageData)
-                    </td>*@
-                <td>
-                    @foreach(var user in item.ProjectUsers)
-                    {
-                        @user.User.FullName <br />
-                    }
-                </td>
-                <td>
-                    @if (await AccessService.CanInteractProject(userId, item.Id, roleName))
-                    {
-                        <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="card">
+    <div class="card-header">
+        <h3 class="text-right">Project Count: @Model.Projects.Count()</h3>
+
+    </div>
+    <div class="card-body">
+        <table class="myTable">
+            <thead>
+                <tr>
+                    <th>
+                        Image
+                    </th>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Currently Assigned
+                    </th>
+                    @*<th>
+                            @Html.DisplayNameFor(model => model.ImagePath)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.ImageData)
+                        </th>*@
+                    <th>
+                        Details
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Projects)
+                {
+                    <tr>
+                        <td><img src="@item.ImagePath" class="img-thumbnail" style="height:100px;width:100px" /></td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        @*<td>
+                                @Html.DisplayFor(modelItem => item.ImagePath)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ImageData)
+                            </td>*@
+                        <td>
+                            @foreach (var user in item.ProjectUsers)
+                            {
+                                var role = (await UserManager.GetRolesAsync(user.User)).FirstOrDefault();
+                                if (role == "ProjectManager")
+                                {
+                                    role = "Project Manager";
+                                }
+                                if (role == "NewUser")
+                                {
+                                    role = "Unassigned";
+                                }
+                                <span>@user.User.FullName: <b>@role</b></span><br />
+                            }
+                        </td>
+                        <td>
+                            @if (await AccessService.CanInteractProject(userId, item.Id, roleName))
+                            {
+                                <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
 <div class="modal" id="create">
     <div class="modal modal-dialog modal-dialog-centered">

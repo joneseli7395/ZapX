@@ -10,8 +10,8 @@ using ZapX.Data;
 namespace ZapX.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20201126004301_Initial_001")]
-    partial class Initial_001
+    [Migration("20201204062635_Initial001")]
+    partial class Initial001
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

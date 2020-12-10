@@ -11,12 +11,27 @@ namespace ZapX.Controllers
     public class ChartsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly List<string> _backgroundColors;
 
         public ChartsController(ApplicationDbContext context)
         {
             _context = context;
+            _backgroundColors = new List<string>
+            {
+                "#FF0000",
+                "#19FF5A",
+                "#FFCE19",
+                "#0D22FF",
+                "#FE7B00",
+                "#19D0FF",
+                "#D20DFF",
+                "#A0FF19",
+                "#00FF06",
+                "#000000"
+            };
         }
 
+        //COME BACK TO THIS FOR CHARTJS
 
         public JsonResult PriorityChart()
         {

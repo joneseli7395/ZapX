@@ -49,22 +49,25 @@ namespace ZapX.Controllers
         {   // Should function similarly to MyTickets, but able to use service to filter projects seen based on user's role or if 
             // the user submitted a ticket for that project.
 
-            var model = new List<Project>();
+            var vm = new TicketProjectsViewModel();
             var userId = _userManager.GetUserId(User);
-
+            var userProjects = _context.ProjectUsers.Where(pu => pu.UserId == userId).ToList();
             if (User.IsInRole("Admin"))
             {
                 //create or use a service (BTProjectService?) that will filter a user's projects on the MyProjects View
-                model = _context.Projects.ToList();
-                return View("MyProjects", model);
+                vm.Projects = await _context.Projects
+                    .Include(p => p.ProjectUsers)
+                    .ThenInclude(p => p.User)
+                    .ToListAsync();
+
+                return View("MyProjects", vm);
             }
             if (User.IsInRole("ProjectManager") || User.IsInRole("Developer") ||
                 User.IsInRole("Submitter") || User.IsInRole("NewUser"))
             {
+                vm.Projects = await _projectService.ListUserProjects(userId);
 
-                model = await _projectService.ListUserProjects(userId);
-
-                return View("MyProjects", model);
+                return View("MyProjects", vm);
 
             }
 
@@ -178,7 +181,7 @@ namespace ZapX.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,ImagePath,ImageData")] Project project)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,ImagePath,ImageData")] Project project, IFormFile image)
         {
             if (!User.IsInRole("Demo"))
             {
@@ -191,6 +194,17 @@ namespace ZapX.Controllers
                 {
                     try
                     {
+                        var memoryStream = new MemoryStream();
+                        image.CopyTo(memoryStream);
+                        byte[] bytes = memoryStream.ToArray();
+                        memoryStream.Close();
+                        memoryStream.Dispose();
+                        var binary = Convert.ToBase64String(bytes);
+                        var ext = Path.GetExtension(image.FileName);
+
+                        project.ImagePath = $"data:image/{ext};base64,{binary}";
+                        project.ImageData = bytes;
+
                         _context.Update(project);
                         await _context.SaveChangesAsync();
                     }
@@ -205,7 +219,7 @@ namespace ZapX.Controllers
                             throw;
                         }
                     }
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction("Details", "Projects", new { id = project.Id });
                 }
                 return View(project);
             }
